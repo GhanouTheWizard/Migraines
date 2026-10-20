@@ -11,354 +11,769 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=1">
 <title>Migraines</title>
 <style>
-/* Layout: une colonne calme, formulaire repliable en haut, bilan du mois, puis journal des crises. Pensé pour un écran de téléphone et des yeux sensibles à la lumière. */
+/* Appli à onglets : Accueil, Journal, Calendrier, Bilan. Saisie dans une feuille plein écran. Couleurs douces pour les yeux sensibles. */
 :root{
-  --bg:#f3f2f6; --surface:#fbfbfd; --fg:#23212c; --muted:#6b6878; --line:#dddbe5;
-  --accent:#6a4f8f; --accent-soft:#ebe5f3; --warn:#a4532b; --warn-soft:#f6e6dc; --ok:#3f7a5c;
-  --display:-apple-system, "SF Pro Rounded", system-ui, "Segoe UI", sans-serif;
-  --body:-apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+  --bg:#f3f2f6; --surface:#ffffff; --surface2:#f8f7fb; --fg:#23212c; --muted:#6b6878; --line:#e2e0e9;
+  --accent:#6a4f8f; --accent-fg:#ffffff; --accent-soft:#ece6f4;
+  --p1:#d9ecdf; --p1f:#2f6a4a; --p2:#f6ecc8; --p2f:#7a5d0e; --p3:#f8dcc8; --p3f:#93451b; --p4:#f3c9c9; --p4f:#8e2525;
+  --warn:#a4532b; --warn-soft:#f8e8de; --ok:#3f7a5c; --ok-soft:#e1f0e7;
+  --mig:#6a4f8f; --ceph:#3d6f8f;
+  --sans:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --round:"SF Pro Rounded", -apple-system, system-ui, "Segoe UI", sans-serif;
+  --tabh:64px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#17161c; --surface:#1f1e26; --fg:#e4e1ec; --muted:#9a96a8; --line:#302e3a;
-  --accent:#b8a0d8; --accent-soft:#2d2738; --warn:#e09a74; --warn-soft:#38261d; --ok:#8cc5a5; color-scheme:dark}}
+  --bg:#141319; --surface:#1e1d25; --surface2:#25232d; --fg:#e7e4ee; --muted:#9a96a8; --line:#33303d;
+  --accent:#b9a2db; --accent-fg:#1a1622; --accent-soft:#2e2839;
+  --p1:#1f3529; --p1f:#9bd3b3; --p2:#3a3218; --p2f:#e8cf7a; --p3:#40291b; --p3f:#f0ab80; --p4:#432020; --p4f:#f3a0a0;
+  --warn:#e3a07a; --warn-soft:#3a271d; --ok:#8cc5a5; --ok-soft:#1f3329; --mig:#b9a2db; --ceph:#86b8d8; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#17161c; --surface:#1f1e26; --fg:#e4e1ec; --muted:#9a96a8; --line:#302e3a;
-  --accent:#b8a0d8; --accent-soft:#2d2738; --warn:#e09a74; --warn-soft:#38261d; --ok:#8cc5a5; color-scheme:dark}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
-.wrap{max-width:640px;margin:0 auto;padding-top:calc(env(safe-area-inset-top, 0px) + 20px);padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 48px);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:22px}
-h1{font-family:var(--display);font-weight:700;font-size:1.75rem;line-height:1.15;margin:0;text-wrap:balance}
-h2{font-family:var(--display);font-weight:500;font-size:1.15rem;margin:0}
-.sub{color:var(--muted);margin:4px 0 0;font-size:.95rem}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
-label,.lbl{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
-.field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
-input[type=date],input[type=time],input[type=text],textarea,select{
-  width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
-textarea{min-height:70px;resize:vertical}
-input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  --bg:#141319; --surface:#1e1d25; --surface2:#25232d; --fg:#e7e4ee; --muted:#9a96a8; --line:#33303d;
+  --accent:#b9a2db; --accent-fg:#1a1622; --accent-soft:#2e2839;
+  --p1:#1f3529; --p1f:#9bd3b3; --p2:#3a3218; --p2f:#e8cf7a; --p3:#40291b; --p3f:#f0ab80; --p4:#432020; --p4f:#f3a0a0;
+  --warn:#e3a07a; --warn-soft:#3a271d; --ok:#8cc5a5; --ok-soft:#1f3329; --mig:#b9a2db; --ceph:#86b8d8; color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+button,label{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* écrans */
+main{padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 24px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:680px;margin:0 auto}
+.screen{display:flex;flex-direction:column;gap:18px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--round);font-size:1.9rem;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.01em}
+h2{font-family:var(--round);font-size:1.12rem;margin:0;font-weight:700}
+.sub{color:var(--muted);font-size:.92rem;margin:2px 0 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.lbl{font-size:.74rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+
+/* boutons */
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-main{background:var(--accent);color:var(--accent-fg)}
+.btn-soft{background:var(--accent-soft);color:var(--accent)}
+.btn-line{background:transparent;border:1px solid var(--line);color:var(--fg)}
+.btn-danger{background:var(--warn-soft);color:var(--warn)}
+.btn-sm{min-height:36px;padding:7px 12px;font-size:.9rem;border-radius:10px}
+.btn-big{width:100%;min-height:60px;font-size:1.08rem;border-radius:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 0;min-width:0}
+
+/* barre d'onglets */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs button{background:none;border:0;height:var(--tabh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.72rem;color:var(--muted);font-weight:600}
+nav.tabs button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button[aria-current=page]{color:var(--accent)}
+.fab{position:fixed;z-index:21;right:max(18px,calc(env(safe-area-inset-right,0px) + 18px));bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 16px);width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);box-shadow:0 6px 18px rgba(40,25,70,.28);display:grid;place-items:center}
+.fab svg{width:28px;height:28px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat b{font-family:var(--round);font-size:1.6rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat span{font-size:.76rem;color:var(--muted);line-height:1.25}
+.alert{background:var(--warn-soft);border-radius:12px;padding:12px;font-size:.92rem;border-left:4px solid var(--warn)}
+
+/* carte crise */
+.crise{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;width:100%}
+.crise.flash{animation:flash 1.6s ease}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.pill{width:52px;height:52px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--round);font-weight:700;font-size:1.35rem;line-height:1;font-variant-numeric:tabular-nums}
+.pill small{font-size:.58rem;font-weight:600;margin-top:2px;opacity:.85}
+.i1{background:var(--p1);color:var(--p1f)} .i2{background:var(--p2);color:var(--p2f)} .i3{background:var(--p3);color:var(--p3f)} .i4{background:var(--p4);color:var(--p4f)} .i0{background:var(--surface2);color:var(--muted)}
+.crise .t{font-weight:700;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.crise .d{font-size:.86rem;color:var(--muted);overflow-wrap:anywhere}
+.tag{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:.02em}
+.tag-mig{background:var(--accent-soft);color:var(--mig)} .tag-ceph{background:color-mix(in srgb,var(--ceph) 16%,transparent);color:var(--ceph)}
+.tag-live{background:var(--warn-soft);color:var(--warn)}
+.chev{color:var(--muted);font-size:1.3rem}
+.daygroup{display:flex;flex-direction:column;gap:8px}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;padding:4px 2px 0}
+.dayhead span{font-weight:500;color:var(--muted);font-size:.85rem}
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:22px 16px;text-align:center;color:var(--muted)}
+
+/* segmenté */
+.seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:9px 6px;font-weight:600;font-size:.92rem;min-height:40px;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* tableau */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:820px;font-size:.88rem}
+th,td{padding:10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface2);position:sticky;top:0}
+tbody tr{cursor:pointer}
+tbody tr:last-child td{border-bottom:0}
+td.meds{min-width:190px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ibox{display:inline-block;min-width:28px;text-align:center;border-radius:8px;padding:2px 6px;font-weight:700}
+
+/* calendrier */
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{font-size:.7rem;text-align:center;color:var(--muted);font-weight:700;padding-bottom:2px}
+.cal button{aspect-ratio:1;max-width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-variant-numeric:tabular-nums;font-size:.92rem;padding:0}
+.cal button.out{visibility:hidden}
+.cal button.today{border-color:var(--accent);border-width:2px}
+.cal button.sel{outline:2px solid var(--fg);outline-offset:1px}
+.cal .dots{display:flex;gap:2px;height:6px}
+.cal .dots i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.8}
+.cal .med{font-size:.6rem;line-height:1}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+/* graphique */
+.bars{display:grid;grid-template-columns:repeat(30,1fr);gap:2px;align-items:end;height:110px;padding-top:6px}
+.bars div{border-radius:3px 3px 0 0;min-height:2px;background:var(--line)}
+.axis{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted)}
+.rank{display:flex;flex-direction:column;gap:8px}
+.rank .r{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:.9rem}
+.rank .bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.rank .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+
+/* feuilles */
+.sheet{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s ease;visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.sheet header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+.sheet header h2{font-size:1.08rem}
+.sheet .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:16px;padding-bottom:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet .body>div{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.sheet footer{padding-top:10px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-top:1px solid var(--line);background:var(--surface)}
+.sheet footer>div{max-width:640px;margin:0 auto;display:flex;gap:10px}
+.x{background:none;border:0;color:var(--accent);font-weight:700;padding:8px 4px;min-height:40px}
+
+/* formulaire */
+.field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input[type=date],input[type=time],input[type=text],textarea{width:100%;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:46px;-webkit-appearance:none;appearance:none}
+textarea{min-height:80px;resize:vertical}
 .scale{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
-.scale button{min-height:40px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;font-variant-numeric:tabular-nums;cursor:pointer;padding:0}
-.scale button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:700}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:8px 14px;font:inherit;font-size:.92rem;cursor:pointer;min-height:40px}
-.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--fg);font-weight:700}
-.btn{border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;min-height:48px}
-.btn-main{background:var(--accent);color:var(--surface)}
-.btn-ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
-.btn-danger{background:transparent;color:var(--warn);border:1px solid var(--line);padding:6px 12px;min-height:36px;font-size:.85rem}
-.actions{display:flex;gap:10px;flex-wrap:wrap}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{display:flex;flex-direction:column;gap:2px}
-.stat b{font-family:var(--display);font-size:1.8rem;font-variant-numeric:tabular-nums;line-height:1}
-.stat span{font-size:.82rem;color:var(--muted);line-height:1.3}
-.alert{background:var(--warn-soft);color:var(--fg);border-radius:10px;padding:12px 14px;font-size:.92rem;border-left:3px solid var(--warn)}
-.note{font-size:.85rem;color:var(--muted)}
-.entry{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
-.entry:first-child{border-top:0;padding-top:0}
-.pain{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.3rem;font-variant-numeric:tabular-nums}
-.entry .meta{display:flex;flex-direction:column;gap:4px;min-width:0}
-.entry .when{font-weight:700}
-.entry .det{font-size:.92rem;color:var(--muted);overflow-wrap:anywhere}
-.entry .det strong{color:var(--fg);font-weight:700}
-.empty{color:var(--muted);text-align:left;padding:8px 0}
-.status{font-size:.85rem;color:var(--ok);min-height:1.2em}
-.status.err{color:var(--warn)}
-details summary{cursor:pointer;list-style:none}
-details summary::-webkit-details-marker{display:none}
-@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.scale button{min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-variant-numeric:tabular-nums;padding:0}
+.scale button[aria-pressed=true]{border-color:transparent;transform:scale(1.06)}
+.scalehint{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 13px;font-size:.9rem;min-height:38px;text-align:left}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+details.grp{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0}
+details.grp>summary{list-style:none;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary .cnt{font-size:.78rem;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 9px}
+details.grp>summary .cnt:empty{display:none}
+details.grp>summary::after{content:"›";transform:rotate(90deg);color:var(--muted);font-size:1.3rem;transition:transform .2s}
+details.grp[open]>summary::after{transform:rotate(-90deg)}
+details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
+.help{font-size:.8rem;color:var(--muted);margin:-3px 0 0}
+.dose{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface2);border-radius:12px;padding:10px 12px}
+.dose b{display:block}
+.dose .small{color:var(--muted)}
+.dosebox{border:1px solid var(--accent);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+
+/* détail */
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:.94rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 86px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-weight:600;font-size:.92rem;opacity:0;transition:all .25s;z-index:60;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+[hidden]{display:none!important}
+.cal button.i1,.scale button.i1{background:var(--p1);color:var(--p1f)} .cal button.i2,.scale button.i2{background:var(--p2);color:var(--p2f)}
+.cal button.i3,.scale button.i3{background:var(--p3);color:var(--p3f)} .cal button.i4,.scale button.i4{background:var(--p4);color:var(--p4f)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
+</head>
+<body>
 
-<div class="wrap">
-  <header>
-    <h1>Carnet de migraines</h1>
-    <p class="sub">Note chaque crise, même petite. Au bout d'un mois, ce carnet est ce qui aide le plus le médecin.</p>
-  </header>
-
-  <section class="panel" aria-labelledby="t-new">
-    <h2 id="t-new">Nouvelle crise</h2>
-    <form id="f" novalidate>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="row">
-          <div class="field"><label for="date">Date</label><input type="date" id="date" required></div>
-          <div class="field"><label for="start">Début</label><input type="time" id="start"></div>
-          <div class="field"><label for="end">Fin</label><input type="time" id="end"></div>
-        </div>
-
-        <div class="field">
-          <span class="lbl" id="l-int">Intensité de 1 à 10</span>
-          <div class="scale" id="scale" role="group" aria-labelledby="l-int"></div>
-        </div>
-
-        <div class="field">
-          <span class="lbl">Où ça fait mal</span>
-          <div class="chips" data-group="where" data-single="1">
-            <button type="button" class="chip">Un côté</button>
-            <button type="button" class="chip">Les deux côtés</button>
-            <button type="button" class="chip">Front</button>
-            <button type="button" class="chip">Nuque</button>
-            <button type="button" class="chip">Derrière l'œil</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <span class="lbl">Signes associés</span>
-          <div class="chips" data-group="symptoms">
-            <button type="button" class="chip">Nausées</button>
-            <button type="button" class="chip">Gêné par la lumière</button>
-            <button type="button" class="chip">Gêné par le bruit</button>
-            <button type="button" class="chip">Troubles visuels avant</button>
-            <button type="button" class="chip">Douleur qui pulse</button>
-            <button type="button" class="chip">Pire en bougeant</button>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="field"><label for="meds">Médicament(s) pris</label><input type="text" id="meds" placeholder="ex. Doliprane, ibuprofène"></div>
-          <div class="field"><label for="medtime">Heure de prise</label><input type="time" id="medtime"></div>
-        </div>
-
-        <div class="field">
-          <span class="lbl">Effet du médicament</span>
-          <div class="chips" data-group="effect" data-single="1">
-            <button type="button" class="chip">Aucun</button>
-            <button type="button" class="chip">Un peu</button>
-            <button type="button" class="chip">Bien soulagé</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <span class="lbl">Déclencheurs possibles</span>
-          <div class="chips" data-group="triggers">
-            <button type="button" class="chip">Mal dormi</button>
-            <button type="button" class="chip">Trop dormi</button>
-            <button type="button" class="chip">Repas sauté</button>
-            <button type="button" class="chip">Peu bu d'eau</button>
-            <button type="button" class="chip">Stress</button>
-            <button type="button" class="chip">Écrans</button>
-            <button type="button" class="chip">Longue route</button>
-            <button type="button" class="chip">Café en plus ou en moins</button>
-            <button type="button" class="chip">Météo</button>
-            <button type="button" class="chip">Odeur forte</button>
-          </div>
-        </div>
-
-        <div class="field"><label for="notes">Notes</label><textarea id="notes" placeholder="Ce qui a aidé, ce que tu faisais avant…"></textarea></div>
-
-        <div class="actions">
-          <button class="btn btn-main" type="submit" id="save">Enregistrer la crise</button>
-          <button class="btn btn-ghost" type="button" id="reset">Effacer</button>
-        </div>
-        <div class="status" id="status" role="status"></div>
+<main>
+  <!-- ACCUEIL -->
+  <section class="screen" id="v-home">
+    <div class="top">
+      <div><h1>Migraines</h1><p class="sub" id="todayLabel"></p></div>
+    </div>
+    <button class="btn btn-main btn-big" id="addBig" type="button">+ Noter une crise</button>
+    <div id="liveBox" class="screen" style="gap:10px"></div>
+    <div class="screen" style="gap:10px">
+      <h2>Aujourd'hui</h2>
+      <div id="todayList" class="daygroup"></div>
+    </div>
+    <div class="card">
+      <h2>Ces 30 derniers jours</h2>
+      <div class="stats">
+        <div class="stat"><b id="h-days">0</b><span>jours avec douleur</span></div>
+        <div class="stat"><b id="h-med">0</b><span>jours avec antidouleur</span></div>
+        <div class="stat"><b id="h-avg">–</b><span>intensité moyenne</span></div>
       </div>
-    </form>
+      <div class="alert" id="h-alert" hidden></div>
+      <button class="btn btn-soft btn-sm" type="button" data-go="stats">Voir le bilan</button>
+    </div>
   </section>
 
-  <section class="panel" aria-labelledby="t-month">
-    <h2 id="t-month">Ces 30 derniers jours</h2>
+  <!-- JOURNAL -->
+  <section class="screen" id="v-log" hidden>
+    <div class="top"><div><h1>Journal</h1><p class="sub" id="logCount"></p></div></div>
+    <div class="seg" role="group" aria-label="Affichage">
+      <button type="button" id="viewList" aria-pressed="true">Cartes</button>
+      <button type="button" id="viewTable" aria-pressed="false">Tableau</button>
+    </div>
+    <div id="logList" class="screen" style="gap:16px"></div>
+    <div id="logTable" hidden></div>
+  </section>
+
+  <!-- CALENDRIER -->
+  <section class="screen" id="v-cal" hidden>
+    <div class="top"><div><h1>Calendrier</h1></div></div>
+    <div class="card">
+      <div class="calhead">
+        <button class="btn btn-line btn-sm" type="button" id="calPrev" aria-label="Mois précédent">‹</button>
+        <h2 id="calTitle"></h2>
+        <button class="btn btn-line btn-sm" type="button" id="calNext" aria-label="Mois suivant">›</button>
+      </div>
+      <div class="cal" id="calGrid"></div>
+      <div class="legend">
+        <span><i class="i1"></i>1 à 3</span><span><i class="i2"></i>4 à 5</span><span><i class="i3"></i>6 à 7</span><span><i class="i4"></i>8 à 10</span><span>💊 médicament</span>
+      </div>
+    </div>
+    <div class="screen" style="gap:10px">
+      <h2 id="calDayTitle"></h2>
+      <div id="calDayList" class="daygroup"></div>
+    </div>
+  </section>
+
+  <!-- BILAN -->
+  <section class="screen" id="v-stats" hidden>
+    <div class="top"><div><h1>Bilan</h1><p class="sub">Les 30 derniers jours</p></div></div>
     <div class="stats">
-      <div class="stat"><b id="s-crises">0</b><span>jours avec mal de tête</span></div>
-      <div class="stat"><b id="s-meds">0</b><span>jours avec antidouleur</span></div>
+      <div class="stat"><b id="s-days">0</b><span>jours avec douleur</span></div>
+      <div class="stat"><b id="s-mig">0</b><span>migraines</span></div>
+      <div class="stat"><b id="s-ceph">0</b><span>maux de tête</span></div>
+      <div class="stat"><b id="s-med">0</b><span>jours avec antidouleur</span></div>
       <div class="stat"><b id="s-avg">–</b><span>intensité moyenne</span></div>
+      <div class="stat"><b id="s-dur">–</b><span>durée moyenne</span></div>
     </div>
-    <div class="alert" id="overuse" hidden>Tu as pris un antidouleur au moins 10 jours ce mois-ci. À ce rythme, les médicaments peuvent eux-mêmes entretenir les maux de tête. Parles-en à ton médecin et montre-lui ce carnet.</div>
-    <p class="note" id="trig"></p>
-  </section>
-
-  <section class="panel" aria-labelledby="t-log">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <h2 id="t-log">Journal</h2>
-      <button class="btn btn-ghost" type="button" id="copy" style="min-height:40px;padding:8px 14px">Copier pour le médecin</button>
+    <div class="alert" id="s-alert" hidden></div>
+    <div class="card">
+      <h2>Intensité jour par jour</h2>
+      <div class="bars" id="bars"></div>
+      <div class="axis"><span id="axL"></span><span>aujourd'hui</span></div>
     </div>
-    <div id="list"><p class="empty">Aucune crise notée pour l'instant. Remplis le formulaire au-dessus pour ajouter la première.</p></div>
-    <textarea id="copyfallback" hidden readonly aria-label="Texte à copier"></textarea>
-  </section>
-
-  <section class="panel" aria-labelledby="t-save">
-    <h2 id="t-save">Sauvegarde</h2>
-    <p class="note" style="margin:0">Tes crises restent uniquement sur ce téléphone. Exporte de temps en temps pour ne rien perdre.</p>
-    <div class="actions">
-      <button class="btn btn-ghost" type="button" id="export">Exporter</button>
-      <label class="btn btn-ghost" for="importfile" style="display:inline-flex;align-items:center;text-transform:none;letter-spacing:0;font-size:1rem;color:var(--accent)">Importer</label>
-      <input type="file" id="importfile" accept=".json,application/json" hidden>
+    <div class="card"><h2>Déclencheurs les plus fréquents</h2><div class="rank" id="rTrig"></div></div>
+    <div class="card"><h2>Symptômes les plus fréquents</h2><div class="rank" id="rSym"></div></div>
+    <div class="card"><h2>Médicaments</h2><div class="rank" id="rMed"></div></div>
+    <div class="card">
+      <h2>Pour le médecin</h2>
+      <p class="small muted" style="margin:0">Copie tout le carnet en texte, à coller dans un mail ou un message.</p>
+      <button class="btn btn-main" type="button" id="copyDoc">Copier le carnet</button>
+      <textarea id="copyFallback" hidden readonly aria-label="Texte du carnet"></textarea>
     </div>
-    <div class="status" id="status2" role="status"></div>
+    <div class="card">
+      <h2>Sauvegarde</h2>
+      <p class="small muted" style="margin:0">Tes crises restent uniquement sur ce téléphone. Exporte de temps en temps pour ne rien perdre.</p>
+      <div class="row">
+        <button class="btn btn-line grow" type="button" id="exportBtn">Exporter</button>
+        <label class="btn btn-line grow" for="importFile">Importer</label>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <p class="small muted">En cas de douleur brutale et inhabituelle, de fièvre avec raideur de nuque, de trouble de la parole ou de la vision, ou de faiblesse d'un côté du corps : appelle le 15.</p>
   </section>
+</main>
 
-  <p class="note">Ces données restent sur ton téléphone. En cas de douleur brutale et inhabituelle, de fièvre avec raideur de nuque, de trouble de la parole ou de faiblesse d'un côté, appelle le 15.</p>
+<button class="fab" id="fab" type="button" aria-label="Noter une crise"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+
+<nav class="tabs" aria-label="Navigation">
+  <button type="button" data-tab="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+  <button type="button" data-tab="log"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg>Journal</button>
+  <button type="button" data-tab="cal"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Calendrier</button>
+  <button type="button" data-tab="stats"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Bilan</button>
+</nav>
+
+<!-- FEUILLE : SAISIE -->
+<div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+  <header><button class="x" type="button" data-close="formSheet">Annuler</button><h2 id="formTitle">Nouvelle crise</h2><span style="width:64px"></span></header>
+  <div class="body"><div>
+
+    <div class="field">
+      <span class="lbl">Type</span>
+      <div class="seg" id="fType" role="group" aria-label="Type">
+        <button type="button" data-v="migraine" aria-pressed="true">Migraine</button>
+        <button type="button" data-v="cephalee" aria-pressed="false">Mal de tête</button>
+      </div>
+      <p class="help">Migraine : souvent d'un côté, qui pulse, avec nausées ou gêne à la lumière. Mal de tête : plutôt une pression ou un serrement, plus supportable.</p>
+    </div>
+
+    <div class="two">
+      <div class="field"><label class="lbl" for="fDate">Date</label><input type="date" id="fDate"></div>
+      <div class="field"><label class="lbl" for="fStart">Début</label><input type="time" id="fStart"></div>
+    </div>
+
+    <div class="field">
+      <span class="lbl">Fin</span>
+      <div class="seg" id="fEndMode" role="group" aria-label="Fin">
+        <button type="button" data-v="ongoing" aria-pressed="true">En cours</button>
+        <button type="button" data-v="time" aria-pressed="false">Heure</button>
+        <button type="button" data-v="allday" aria-pressed="false">Toute la journée</button>
+      </div>
+      <input type="time" id="fEnd" hidden aria-label="Heure de fin">
+      <p class="help" id="fEndHelp">Tu pourras la terminer plus tard depuis l'accueil.</p>
+    </div>
+
+    <div class="field">
+      <span class="lbl">Intensité</span>
+      <div class="scale" id="fScale" role="group" aria-label="Intensité de 1 à 10"></div>
+      <div class="scalehint"><span>1 gêne légère</span><span>5 difficile de se concentrer</span><span>10 insupportable</span></div>
+    </div>
+
+    <details class="grp" open id="gMeds">
+      <summary>Médicaments et soins <span class="cnt" id="cMeds"></span></summary>
+      <div class="in">
+        <div id="doseList" class="daygroup"></div>
+        <div id="doseEditor" class="dosebox" hidden></div>
+        <button class="btn btn-soft" type="button" id="addDose">+ Ajouter une prise</button>
+        <p class="help">Ajoute une ligne par prise, même si tu en prends plusieurs à des heures différentes.</p>
+      </div>
+    </details>
+
+    <div id="symGroups"></div>
+
+    <div class="field"><label class="lbl" for="fNotes">Notes</label><textarea id="fNotes" placeholder="Ce que tu faisais avant, ce qui a aidé, comment tu te sens…"></textarea></div>
+  </div></div>
+  <footer><div>
+    <button class="btn btn-main grow" type="button" id="saveBtn">Enregistrer</button>
+  </div></footer>
 </div>
+
+<!-- FEUILLE : DÉTAIL -->
+<div class="sheet" id="detailSheet" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+  <header><button class="x" type="button" data-close="detailSheet">Fermer</button><h2 id="detailTitle">Crise</h2><button class="x" type="button" id="editBtn">Modifier</button></header>
+  <div class="body"><div id="detailBody"></div></div>
+  <footer><div id="detailActions"></div></footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
 
 <script>
 (function(){
-  const $ = s => document.querySelector(s);
-  let intensity = 0, entries = [], mode = 'local'; const col = null;
-  const LKEY = 'carnet-migraines-v1';
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KEY='carnet-migraines-v1';
 
-  // échelle
-  const scale = $('#scale');
-  for(let i=1;i<=10;i++){
-    const b=document.createElement('button'); b.type='button'; b.textContent=i; b.setAttribute('aria-pressed','false');
-    b.setAttribute('aria-label','Intensité '+i);
-    b.onclick=()=>{intensity=i; [...scale.children].forEach((c,k)=>c.setAttribute('aria-pressed', String(k+1===i)));};
-    scale.appendChild(b);
+/* ---------- référentiels ---------- */
+const MEDS=[
+  {n:'Doliprane (paracétamol)',a:1},{n:'Ibuprofène / Advil',a:1},{n:'Anti-inflammatoire',a:1},{n:'Aspirine',a:1},
+  {n:'Triptan',a:1},{n:'Antinauséeux',a:0},{n:'Baume du tigre',a:0},{n:'Poche de froid',a:0},{n:'Café',a:0},{n:'Sieste',a:0}
+];
+const NOT_ANALGESIC=new Set(MEDS.filter(m=>!m.a).map(m=>m.n));
+const EFFECTS=['Je ne sais pas encore','Aucun effet','Un peu soulagé','Bien soulagé'];
+const GROUPS=[
+  {k:'where',t:'Où ça fait mal',h:'Touche tous les endroits concernés.',o:['Côté gauche','Côté droit','Les deux côtés','Front','Tempes','Derrière les yeux','Sommet du crâne','Arrière du crâne','Nuque','Mâchoire / visage']},
+  {k:'pain',t:'Type de douleur',h:'Comment tu décrirais la douleur ?',o:['Ça pulse, ça bat','Serrement, comme un étau','Pression, tête lourde','Coup de poignard','Brûlure','Douleur sourde, de fond','Change de côté']},
+  {k:'symptoms',t:'Signes associés',h:'Ce que tu ressens en même temps que la douleur.',o:['Nausées','Vomissements','Gêné par la lumière','Gêné par le bruit','Gêné par les odeurs','Pire quand je bouge','Vertiges','Grosse fatigue','Difficulté à me concentrer','Œil qui coule ou rouge','Nez bouché ou qui coule','Cou ou nuque raide','Mal aux yeux','Pâleur, froid','Besoin de m\'allonger dans le noir']},
+  {k:'aura',t:'Avant la crise',h:'Signes dans les minutes ou heures avant. Les troubles visuels qui précèdent s\'appellent une aura.',o:['Zigzags ou taches lumineuses','Vision floue ou trouée','Fourmillements','Mots qui ne viennent pas','Bâillements','Envie de sucré','Irritabilité','Raideur du cou avant','Rien de particulier']},
+  {k:'triggers',t:'Déclencheurs possibles',h:'Ce qui a pu jouer dans les 24 h avant.',o:['Mal dormi','Trop dormi','Couché tard','Repas sauté','Peu bu d\'eau','Stress','Fin d\'une période de stress','Écrans longtemps','Longue route','Café en plus','Café en moins','Alcool','Chocolat, fromage','Effort physique','Chaleur, soleil','Météo qui change','Odeur forte','Bruit, foule','Lumière forte','Mauvaise posture','Mâchoire serrée']}
+];
+
+/* ---------- état ---------- */
+let entries=load();
+let tab='home', logView='list', calMonth=firstOfMonth(new Date()), calSel=todayISO();
+let form=null, editingDose=null, detailId=null, flashId=null;
+
+function load(){
+  let a=[]; try{a=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){}
+  if(!Array.isArray(a)) a=[];
+  return a.filter(e=>e&&e.date).map(migrate);
+}
+function migrate(e){
+  const o=Object.assign({},e);
+  if(!o.id) o.id=uid();
+  if(!o.type) o.type='migraine';
+  if(!Array.isArray(o.meds)){
+    o.meds = (typeof o.meds==='string'&&o.meds.trim()) ? [{id:uid(),name:o.meds.trim(),time:o.medtime||'',effect:o.effect||''}] : [];
   }
-  // chips
-  document.querySelectorAll('.chips').forEach(g=>{
-    const single = g.dataset.single;
-    g.querySelectorAll('.chip').forEach(c=>{
-      c.setAttribute('aria-pressed','false');
-      c.onclick=()=>{
-        const on = c.getAttribute('aria-pressed')!=='true';
-        if(single) g.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed','false'));
-        c.setAttribute('aria-pressed', String(on));
-      };
+  if(typeof o.where==='string') o.where=o.where?[o.where]:[];
+  ['where','pain','symptoms','aura','triggers'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
+  if(!o.endMode) o.endMode = o.end ? 'time' : 'unknown';
+  delete o.medtime; delete o.effect;
+  return o;
+}
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(entries)); return true;}catch(e){ toast("Impossible d'enregistrer sur ce téléphone (stockage plein ou navigation privée)."); return false; } }
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+/* ---------- dates ---------- */
+function pad(n){return String(n).padStart(2,'0');}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function todayISO(){return iso(new Date());}
+function nowHM(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
+function firstOfMonth(d){return new Date(d.getFullYear(),d.getMonth(),1);}
+function parseISO(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function fmtDay(s,long){
+  const d=parseISO(s), t=todayISO(), y=new Date(); y.setDate(y.getDate()-1);
+  if(s===t) return "Aujourd'hui"; if(s===iso(y)) return 'Hier';
+  return d.toLocaleDateString('fr-FR',long?{weekday:'long',day:'numeric',month:'long'}:{weekday:'short',day:'numeric',month:'short'});
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function minutes(hm){if(!hm)return null;const [h,m]=hm.split(':').map(Number);return h*60+m;}
+function duration(e){
+  if(e.endMode!=='time'||!e.start||!e.end) return null;
+  let d=minutes(e.end)-minutes(e.start); if(d<0) d+=1440; return d;
+}
+function fmtDur(m){if(m==null)return '';const h=Math.floor(m/60),mm=m%60;return h?(h+' h'+(mm?' '+pad(mm):'')):(mm+' min');}
+function timeText(e){
+  const s=e.start||'?';
+  if(e.endMode==='ongoing') return (e.start?'depuis '+e.start:'')+' · en cours';
+  if(e.endMode==='allday') return 'toute la journée';
+  if(e.endMode==='time'&&e.end) return s+' → '+e.end+' ('+fmtDur(duration(e))+')';
+  return e.start?'à '+e.start:'heure non notée';
+}
+function lvl(i){return !i?0:i<=3?1:i<=5?2:i<=7?3:4;}
+function sortKey(e){return e.date+' '+(e.start||'00:00');}
+
+/* ---------- utilitaires ---------- */
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+let toastT; function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2600);}
+function segSet(el,v){[...el.children].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));}
+function segGet(el){const b=[...el.children].find(b=>b.getAttribute('aria-pressed')==='true');return b?b.dataset.v:null;}
+
+/* ---------- navigation ---------- */
+function go(t){
+  tab=t;
+  ['home','log','cal','stats'].forEach(k=>{$('#v-'+k).hidden=k!==t;});
+  $$('nav.tabs button').forEach(b=>{ if(b.dataset.tab===t) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  render(); window.scrollTo(0,0);
+}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+$$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+
+/* ---------- rendu cartes ---------- */
+function crisisCard(e){
+  const b=document.createElement('button'); b.type='button'; b.className='crise'+(e.id===flashId?' flash':'');
+  const meds=e.meds.length?e.meds.length+' prise'+(e.meds.length>1?'s':''):'';
+  const extra=[e.where.slice(0,2).join(', '),meds].filter(Boolean).join(' · ');
+  b.innerHTML=`<div class="pill i${lvl(e.intensity)}">${e.intensity||'?'}<small>/10</small></div>
+    <div style="min-width:0"><div class="t">${e.type==='migraine'?'<span class="tag tag-mig">Migraine</span>':'<span class="tag tag-ceph">Mal de tête</span>'}${e.endMode==='ongoing'?'<span class="tag tag-live">En cours</span>':''}</div>
+    <div class="d">${esc(timeText(e))}</div>${extra?`<div class="d">${esc(extra)}</div>`:''}</div><span class="chev">›</span>`;
+  b.onclick=()=>openDetail(e.id);
+  return b;
+}
+function emptyBox(t){const d=document.createElement('div');d.className='empty';d.textContent=t;return d;}
+
+function renderHome(){
+  $('#todayLabel').textContent=cap(new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}));
+  const live=entries.filter(e=>e.endMode==='ongoing').sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+  const lb=$('#liveBox'); lb.innerHTML='';
+  if(live.length){
+    const h=document.createElement('h2'); h.textContent='En cours'; lb.appendChild(h);
+    live.forEach(e=>{
+      const wrap=document.createElement('div'); wrap.className='card'; wrap.style.borderColor='var(--warn)';
+      wrap.appendChild(crisisCard(e)); wrap.firstChild.style.border='0'; wrap.firstChild.style.padding='0';
+      const r=document.createElement('div'); r.className='row';
+      r.innerHTML='<button class="btn btn-soft btn-sm grow" type="button">+ Médicament</button><button class="btn btn-main btn-sm grow" type="button">C\'est passé</button>';
+      r.children[0].onclick=()=>openForm(e.id,true);
+      r.children[1].onclick=()=>finish(e.id);
+      wrap.appendChild(r); lb.appendChild(wrap);
     });
-  });
-  const picked = name => [...document.querySelectorAll(`[data-group="${name}"] .chip[aria-pressed=true]`)].map(c=>c.textContent);
-
-  function today(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
-  function resetForm(){
-    $('#f').reset(); $('#date').value=today(); intensity=0;
-    document.querySelectorAll('[aria-pressed]').forEach(b=>b.setAttribute('aria-pressed','false'));
   }
-  resetForm();
-  $('#reset').onclick=resetForm;
+  const tl=$('#todayList'); tl.innerHTML='';
+  const td=entries.filter(e=>e.date===todayISO()&&e.endMode!=='ongoing').sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
+  if(td.length) td.forEach(e=>tl.appendChild(crisisCard(e)));
+  else tl.appendChild(emptyBox(live.length?'Pas d\'autre crise terminée aujourd\'hui.':'Rien de noté aujourd\'hui. Appuie sur « Noter une crise » dès que ça commence.'));
+  const s=stats30();
+  $('#h-days').textContent=s.days; $('#h-med').textContent=s.medDays; $('#h-avg').textContent=s.avg;
+  setAlert($('#h-alert'),s);
+}
+function setAlert(el,s){
+  if(s.medDays>=10){el.hidden=false;el.textContent='Antidouleurs pris '+s.medDays+' jours sur les 30 derniers. À partir de 10 jours par mois, les médicaments peuvent eux-mêmes entretenir les maux de tête. Montre ce carnet à ton médecin.';}
+  else if(s.days>=8){el.hidden=false;el.textContent='Douleur '+s.days+' jours sur les 30 derniers. C\'est fréquent : ça vaut le coup d\'en parler à un médecin avec ce carnet.';}
+  else el.hidden=true;
+}
 
-  function setStatus(t,err){const s=$('#status'); s.textContent=t; s.className='status'+(err?' err':''); if(t) setTimeout(()=>{if(s.textContent===t)s.textContent='';},4000);}
-
-  function painColor(n){
-    if(n>=7) return 'background:var(--warn-soft);color:var(--warn)';
-    if(n>=4) return 'background:var(--accent-soft);color:var(--accent)';
-    return 'background:var(--bg);color:var(--muted)';
-  }
-  function fmtDate(iso){
-    try{return new Date(iso+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}catch(e){return iso;}
-  }
-  function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
-
-  function render(){
-    const list=$('#list');
-    const sorted=[...entries].sort((a,b)=>(b.date+(b.start||'')).localeCompare(a.date+(a.start||'')));
-    if(!sorted.length){ list.innerHTML='<p class="empty">Aucune crise notée pour l\'instant. Remplis le formulaire au-dessus pour ajouter la première.</p>'; }
-    else{
-      list.innerHTML='';
-      sorted.forEach(e=>{
-        const el=document.createElement('div'); el.className='entry';
-        const time=[e.start,e.end].filter(Boolean).join(' → ');
-        const parts=[];
-        if(e.where) parts.push(esc(e.where));
-        if(e.symptoms&&e.symptoms.length) parts.push(esc(e.symptoms.join(', ')));
-        if(e.meds) parts.push('<strong>'+esc(e.meds)+'</strong>'+(e.medtime?' à '+esc(e.medtime):'')+(e.effect?' ('+esc(e.effect.toLowerCase())+')':''));
-        if(e.triggers&&e.triggers.length) parts.push('Déclencheurs : '+esc(e.triggers.join(', ')));
-        if(e.notes) parts.push(esc(e.notes));
-        el.innerHTML=`<div class="pain" style="${painColor(e.intensity||0)}">${e.intensity||'?'}</div>
-          <div class="meta"><div class="when">${esc(fmtDate(e.date))}${time?' · '+esc(time):''}</div>
-          ${parts.map(p=>'<div class="det">'+p+'</div>').join('')}
-          <div><button class="btn-danger btn" type="button">Supprimer</button></div></div>`;
-        const del=el.querySelector('.btn-danger');
-        let armed=false;
-        del.onclick=async()=>{
-          if(!armed){armed=true;del.textContent='Confirmer la suppression';setTimeout(()=>{armed=false;del.textContent='Supprimer';},4000);return;}
-          await remove(e.id);
-        };
-        list.appendChild(el);
-      });
-    }
-    // stats 30 jours
-    const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-30);
-    const cut=cutoff.toISOString().slice(0,10);
-    const recent=entries.filter(e=>e.date>=cut);
-    const days=new Set(recent.map(e=>e.date));
-    const medDays=new Set(recent.filter(e=>e.meds&&e.meds.trim()).map(e=>e.date));
-    const withI=recent.filter(e=>e.intensity);
-    $('#s-crises').textContent=days.size;
-    $('#s-meds').textContent=medDays.size;
-    $('#s-avg').textContent=withI.length?(withI.reduce((a,e)=>a+e.intensity,0)/withI.length).toFixed(1).replace('.',','):'–';
-    $('#overuse').hidden=medDays.size<10;
-    const tc={}; recent.forEach(e=>(e.triggers||[]).forEach(t=>tc[t]=(tc[t]||0)+1));
-    const top=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    $('#trig').textContent=top.length?'Déclencheurs les plus fréquents : '+top.map(([t,n])=>t.toLowerCase()+' ('+n+')').join(', ')+'.':'';
-  }
-
-  function toText(){
-    const sorted=[...entries].sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')));
-    const lines=['Carnet de migraines'];
-    sorted.forEach(e=>{
-      const t=[e.start,e.end].filter(Boolean).join('-');
-      let l=`${e.date}${t?' '+t:''} | intensité ${e.intensity||'?'}/10`;
-      if(e.where) l+=` | ${e.where}`;
-      if(e.symptoms&&e.symptoms.length) l+=` | ${e.symptoms.join(', ')}`;
-      if(e.meds) l+=` | ${e.meds}${e.medtime?' à '+e.medtime:''}${e.effect?' ('+e.effect+')':''}`;
-      if(e.triggers&&e.triggers.length) l+=` | déclencheurs : ${e.triggers.join(', ')}`;
-      if(e.notes) l+=` | ${e.notes}`;
-      lines.push(l);
+function renderLog(){
+  const all=[...entries].sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+  $('#logCount').textContent=all.length?all.length+' crise'+(all.length>1?'s':'')+' notée'+(all.length>1?'s':''):'';
+  $('#viewList').setAttribute('aria-pressed',String(logView==='list'));
+  $('#viewTable').setAttribute('aria-pressed',String(logView==='table'));
+  const L=$('#logList'), T=$('#logTable');
+  L.hidden=logView!=='list'; T.hidden=logView!=='table';
+  L.innerHTML=''; T.innerHTML='';
+  if(!all.length){ (logView==='list'?L:T).appendChild(emptyBox('Aucune crise notée pour l\'instant. Appuie sur le bouton + pour ajouter la première.')); return; }
+  if(logView==='list'){
+    const byDay={}; all.forEach(e=>(byDay[e.date]=byDay[e.date]||[]).push(e));
+    Object.keys(byDay).sort().reverse().forEach(d=>{
+      const g=document.createElement('div'); g.className='daygroup';
+      const list=byDay[d].sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
+      g.innerHTML=`<div class="dayhead">${esc(cap(fmtDay(d,true)))}<span>${list.length} crise${list.length>1?'s':''}</span></div>`;
+      list.forEach(e=>g.appendChild(crisisCard(e)));
+      L.appendChild(g);
     });
-    return lines.join('\n');
+  } else {
+    const w=document.createElement('div'); w.className='tablewrap';
+    w.innerHTML=`<table><thead><tr><th>Date</th><th>Horaire</th><th>Type</th><th>Int.</th><th>Médicaments</th><th>Signes</th><th>Déclencheurs</th></tr></thead><tbody></tbody></table>`;
+    const tb=w.querySelector('tbody');
+    all.forEach(e=>{
+      const tr=document.createElement('tr');
+      const meds=e.meds.map(m=>(m.time?m.time+' ':'')+m.name).join('<br>');
+      tr.innerHTML=`<td class="num">${esc(parseISO(e.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}))}</td>
+        <td class="num">${esc(e.endMode==='allday'?'journée':e.endMode==='ongoing'?(e.start||'?')+' → …':e.endMode==='time'?(e.start||'?')+' → '+e.end:(e.start||'–'))}</td>
+        <td>${e.type==='migraine'?'Migraine':'Mal de tête'}</td>
+        <td><span class="ibox i${lvl(e.intensity)}">${e.intensity||'?'}</span></td>
+        <td class="meds">${meds?meds.split('<br>').map(esc).join('<br>'):'–'}</td>
+        <td>${esc([...e.where,...e.symptoms].slice(0,4).join(', ')||'–')}</td>
+        <td>${esc(e.triggers.join(', ')||'–')}</td>`;
+      tr.onclick=()=>openDetail(e.id); tb.appendChild(tr);
+    });
+    T.appendChild(w);
+    const p=document.createElement('p'); p.className='small muted'; p.textContent='Fais glisser le tableau vers la gauche pour voir toutes les colonnes. Touche une ligne pour le détail.'; T.appendChild(p);
   }
-  $('#copy').onclick=()=>{
-    const txt=toText(); const fb=$('#copyfallback');
-    const fallback=()=>{fb.hidden=false; fb.value=txt; fb.style.minHeight='160px'; fb.focus(); fb.select();};
-    try{ navigator.clipboard.writeText(txt).then(()=>{ $('#copy').textContent='Copié'; setTimeout(()=>$('#copy').textContent='Copier pour le médecin',2500);}).catch(fallback);}catch(e){fallback();}
-  };
+}
+$('#viewList').onclick=()=>{logView='list';renderLog();};
+$('#viewTable').onclick=()=>{logView='table';renderLog();};
 
-  // stockage
-  function loadLocal(){try{entries=JSON.parse(localStorage.getItem(LKEY)||'[]');}catch(e){entries=[];}}
-  function saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(entries));}catch(e){}}
-  async function remove(id){
-    if(mode==='db'){ try{await col.doc(id).delete();}catch(e){setStatus("La suppression n'a pas abouti. Réessaie dans un instant.",true);} }
-    else { entries=entries.filter(e=>e.id!==id); saveLocal(); render(); }
+function renderCal(){
+  const y=calMonth.getFullYear(), m=calMonth.getMonth();
+  $('#calTitle').textContent=cap(calMonth.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}));
+  const g=$('#calGrid'); g.innerHTML='';
+  ['L','M','M','J','V','S','D'].forEach(d=>{const s=document.createElement('div');s.className='wd';s.textContent=d;g.appendChild(s);});
+  const offset=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<offset;i++){const b=document.createElement('button');b.className='out';b.tabIndex=-1;b.setAttribute('aria-hidden','true');g.appendChild(b);}
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+pad(m+1)+'-'+pad(d), list=entries.filter(e=>e.date===ds);
+    const b=document.createElement('button'); b.type='button';
+    const mx=Math.max(0,...list.map(e=>e.intensity||0)), hasMed=list.some(e=>e.meds.some(x=>!NOT_ANALGESIC.has(x.name)));
+    b.className=(list.length?'i'+(lvl(mx)||1):'')+(ds===todayISO()?' today':'')+(ds===calSel?' sel':'');
+    b.innerHTML=`<span>${d}</span><span class="dots">${list.slice(0,4).map(()=>'<i></i>').join('')}</span>${hasMed?'<span class="med">💊</span>':''}`;
+    b.setAttribute('aria-label',d+' : '+(list.length?list.length+' crise(s)':'aucune crise'));
+    b.onclick=()=>{calSel=ds;renderCal();};
+    g.appendChild(b);
   }
+  $('#calDayTitle').textContent=cap(fmtDay(calSel,true));
+  const dl=$('#calDayList'); dl.innerHTML='';
+  const list=entries.filter(e=>e.date===calSel).sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
+  if(list.length) list.forEach(e=>dl.appendChild(crisisCard(e))); else dl.appendChild(emptyBox('Aucune crise ce jour-là.'));
+}
+$('#calPrev').onclick=()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal();};
+$('#calNext').onclick=()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal();};
 
-  $('#f').addEventListener('submit',async ev=>{
-    ev.preventDefault();
-    if(!$('#date').value){setStatus('Indique la date de la crise.',true);return;}
-    if(!intensity){setStatus("Choisis l'intensité de 1 à 10.",true);return;}
-    const e={date:$('#date').value,start:$('#start').value,end:$('#end').value,intensity,
-      where:picked('where')[0]||'',symptoms:picked('symptoms'),meds:$('#meds').value.trim(),medtime:$('#medtime').value,
-      effect:picked('effect')[0]||'',triggers:picked('triggers'),notes:$('#notes').value.trim(),created:Date.now()};
-    $('#save').disabled=true;
-    try{
-      if(mode==='db'){ await col.add(e); }
-      else { e.id='l'+Date.now(); entries.push(e); saveLocal(); render(); }
-      resetForm(); setStatus('Crise enregistrée.');
-    }catch(err){ setStatus("L'enregistrement n'a pas abouti. Réessaie dans un instant.",true); }
-    $('#save').disabled=false;
+function recent30(){const c=new Date();c.setDate(c.getDate()-29);const cs=iso(c);return entries.filter(e=>e.date>=cs);}
+function stats30(){
+  const r=recent30(), days=new Set(r.map(e=>e.date));
+  const medDays=new Set(r.filter(e=>e.meds.some(m=>!NOT_ANALGESIC.has(m.name))).map(e=>e.date));
+  const wi=r.filter(e=>e.intensity), durs=r.map(duration).filter(x=>x!=null);
+  return {r,days:days.size,medDays:medDays.size,mig:r.filter(e=>e.type==='migraine').length,ceph:r.filter(e=>e.type!=='migraine').length,
+    avg:wi.length?(wi.reduce((a,e)=>a+e.intensity,0)/wi.length).toFixed(1).replace('.',','):'–',
+    dur:durs.length?fmtDur(Math.round(durs.reduce((a,b)=>a+b,0)/durs.length)):'–'};
+}
+function rank(el,counts,empty){
+  el.innerHTML=''; const arr=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(!arr.length){el.innerHTML='<p class="small muted" style="margin:0">'+esc(empty)+'</p>';return;}
+  const max=arr[0][1];
+  arr.forEach(([k,n])=>{const d=document.createElement('div');d.className='r';d.innerHTML=`<span>${esc(k)}</span><b>${n}</b><div class="bar"><i style="width:${Math.round(n/max*100)}%"></i></div>`;el.appendChild(d);});
+}
+function renderStats(){
+  const s=stats30();
+  $('#s-days').textContent=s.days; $('#s-mig').textContent=s.mig; $('#s-ceph').textContent=s.ceph;
+  $('#s-med').textContent=s.medDays; $('#s-avg').textContent=s.avg; $('#s-dur').textContent=s.dur;
+  setAlert($('#s-alert'),s);
+  const bars=$('#bars'); bars.innerHTML='';
+  for(let i=29;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i); const ds=iso(d);
+    const mx=Math.max(0,...entries.filter(e=>e.date===ds).map(e=>e.intensity||0));
+    const b=document.createElement('div'); if(mx){b.className='i'+lvl(mx); b.style.background='';}
+    b.style.height=(mx?mx*10:2)+'%'; if(mx) b.style.backgroundColor='currentColor';
+    b.title=ds+' : '+(mx||'aucune');
+    bars.appendChild(b);
+  }
+  const d0=new Date(); d0.setDate(d0.getDate()-29); $('#axL').textContent=d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  const ct=k=>{const c={};s.r.forEach(e=>(e[k]||[]).forEach(x=>c[x]=(c[x]||0)+1));return c;};
+  rank($('#rTrig'),ct('triggers'),'Pas encore de déclencheur noté.');
+  const sy={}; s.r.forEach(e=>[...e.symptoms,...e.pain].forEach(x=>sy[x]=(sy[x]||0)+1)); rank($('#rSym'),sy,'Pas encore de symptôme noté.');
+  const md={}; s.r.forEach(e=>e.meds.forEach(m=>md[m.name]=(md[m.name]||0)+1)); rank($('#rMed'),md,'Aucun médicament noté.');
+}
+function render(){ if(tab==='home')renderHome(); else if(tab==='log')renderLog(); else if(tab==='cal')renderCal(); else renderStats(); }
+
+/* ---------- feuilles ---------- */
+function openSheet(id){const s=$('#'+id);s.classList.add('open');s.querySelector('.body').scrollTop=0;document.body.style.overflow='hidden';}
+function closeSheet(id){$('#'+id).classList.remove('open');if(!$$('.sheet.open').length)document.body.style.overflow='';}
+$$('[data-close]').forEach(b=>b.onclick=()=>closeSheet(b.dataset.close));
+
+/* ---------- formulaire ---------- */
+const scale=$('#fScale');
+for(let i=1;i<=10;i++){const b=document.createElement('button');b.type='button';b.textContent=i;b.setAttribute('aria-label','Intensité '+i);b.onclick=()=>{form.intensity=i;paintScale();};scale.appendChild(b);}
+function paintScale(){[...scale.children].forEach((b,k)=>{const on=k+1===form.intensity;b.setAttribute('aria-pressed',String(on));b.className=on?'i'+lvl(k+1):'';});}
+
+const sg=$('#symGroups');
+GROUPS.forEach(G=>{
+  const d=document.createElement('details'); d.className='grp'; d.dataset.k=G.k; d.style.marginBottom='16px';
+  d.innerHTML=`<summary>${esc(G.t)} <span class="cnt"></span></summary><div class="in"><p class="help" style="margin:0">${esc(G.h)}</p><div class="chips"></div></div>`;
+  const c=d.querySelector('.chips');
+  G.o.forEach(o=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=o;b.onclick=()=>{
+    const arr=form[G.k]; const i=arr.indexOf(o); if(i>=0)arr.splice(i,1); else arr.push(o); paintGroups();};c.appendChild(b);});
+  sg.appendChild(d);
+});
+function paintGroups(){
+  $$('details.grp[data-k]').forEach(d=>{const arr=form[d.dataset.k];d.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',String(arr.includes(b.textContent))));d.querySelector('.cnt').textContent=arr.length||'';});
+}
+
+$('#fType').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;form.type=b.dataset.v;segSet($('#fType'),form.type);};
+$('#fEndMode').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;form.endMode=b.dataset.v;paintEnd();if(form.endMode==='time'&&!$('#fEnd').value)$('#fEnd').value=nowHM();};
+function paintEnd(){
+  segSet($('#fEndMode'),form.endMode==='unknown'?'time':form.endMode);
+  $('#fEnd').hidden=form.endMode!=='time';
+  $('#fEndHelp').textContent=form.endMode==='ongoing'?'Tu pourras la terminer plus tard depuis l\'accueil.':form.endMode==='allday'?'Pour une douleur qui ne t\'a pas lâché de la journée.':'Heure à laquelle la douleur est partie.';
+}
+
+function blankForm(){return {id:null,type:'migraine',date:todayISO(),start:nowHM(),end:'',endMode:'ongoing',intensity:0,meds:[],where:[],pain:[],symptoms:[],aura:[],triggers:[],notes:''};}
+function openForm(id,focusMeds){
+  const e=id?entries.find(x=>x.id===id):null;
+  form=e?JSON.parse(JSON.stringify(e)):blankForm();
+  $('#formTitle').textContent=e?'Modifier la crise':'Nouvelle crise';
+  segSet($('#fType'),form.type);
+  $('#fDate').value=form.date; $('#fStart').value=form.start||''; $('#fEnd').value=form.end||''; $('#fNotes').value=form.notes||'';
+  paintEnd(); paintScale(); paintGroups(); editingDose=null; renderDoses();
+  closeSheet('detailSheet'); openSheet('formSheet');
+  if(focusMeds){ $('#gMeds').open=true; startDose(null); setTimeout(()=>$('#gMeds').scrollIntoView({block:'start'}),300); }
+}
+
+/* prises de médicaments */
+function renderDoses(){
+  const L=$('#doseList'); L.innerHTML='';
+  const ds=[...form.meds].sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  ds.forEach(m=>{
+    const d=document.createElement('div'); d.className='dose';
+    d.innerHTML=`<div><b>${esc(m.name)}${m.dose?' · '+esc(m.dose):''}</b><span class="small">${m.time?esc(m.time):'heure non notée'}${m.effect?' · '+esc(m.effect.toLowerCase()):''}</span></div><button class="btn btn-line btn-sm" type="button">Modifier</button>`;
+    d.querySelector('button').onclick=()=>startDose(m.id);
+    L.appendChild(d);
   });
-
-  loadLocal(); render();
-
-  // sauvegarde
-  const st2=t=>{const s=$('#status2');s.textContent=t;setTimeout(()=>{if(s.textContent===t)s.textContent='';},4000);};
-  $('#export').onclick=async()=>{
-    const data=JSON.stringify({app:'migraines',version:1,exported:new Date().toISOString(),entries},null,1);
-    const name='migraines-'+today()+'.json';
-    try{
-      const file=new File([data],name,{type:'application/json'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Carnet de migraines'}); return; }
-    }catch(e){ if(e&&e.name==='AbortError') return; }
-    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'})); a.download=name;
-    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+  $('#cMeds').textContent=form.meds.length||'';
+  $('#addDose').hidden=!!editingDose;
+}
+function startDose(id){
+  const m=id?form.meds.find(x=>x.id===id):{id:uid(),name:'',dose:'',time:nowHM(),effect:'Je ne sais pas encore',_new:true};
+  editingDose=JSON.parse(JSON.stringify(m));
+  const box=$('#doseEditor'); box.hidden=false;
+  box.innerHTML=`<span class="lbl">Quoi</span><div class="chips" id="dName"></div>
+    <input type="text" id="dCustom" placeholder="Autre (écris le nom)">
+    <div class="two"><div class="field"><label class="lbl" for="dTime">Heure</label><input type="time" id="dTime"></div>
+    <div class="field"><label class="lbl" for="dDose">Dose (facultatif)</label><input type="text" id="dDose" placeholder="ex. 1 g, 400 mg"></div></div>
+    <span class="lbl">Effet</span><div class="chips" id="dEffect"></div>
+    <div class="row"><button class="btn btn-main btn-sm grow" type="button" id="dOk">Valider la prise</button><button class="btn btn-line btn-sm" type="button" id="dCancel">Annuler</button>${m._new?'':'<button class="btn btn-danger btn-sm" type="button" id="dDel">Retirer</button>'}</div>`;
+  const nm=$('#dName');
+  MEDS.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=x.n;b.onclick=()=>{editingDose.name=x.n;$('#dCustom').value='';paintDose();};nm.appendChild(b);});
+  const known=MEDS.some(x=>x.n===editingDose.name);
+  $('#dCustom').value=known?'':editingDose.name;
+  $('#dCustom').oninput=ev=>{editingDose.name=ev.target.value;paintDose();};
+  $('#dTime').value=editingDose.time||''; $('#dDose').value=editingDose.dose||'';
+  const ef=$('#dEffect');
+  EFFECTS.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=x;b.onclick=()=>{editingDose.effect=x;paintDose();};ef.appendChild(b);});
+  $('#dOk').onclick=()=>{
+    const name=(editingDose.name||'').trim(); if(!name){toast('Choisis ou écris le médicament.');return;}
+    editingDose.name=name; editingDose.time=$('#dTime').value; editingDose.dose=$('#dDose').value.trim(); delete editingDose._new;
+    const i=form.meds.findIndex(x=>x.id===editingDose.id); if(i>=0)form.meds[i]=editingDose; else form.meds.push(editingDose);
+    closeDose();
   };
-  $('#importfile').onchange=ev=>{
-    const f=ev.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const d=JSON.parse(r.result); const list=Array.isArray(d)?d:d.entries;
-        if(!Array.isArray(list)) throw 0;
-        const ids=new Set(entries.map(e=>e.id)); let n=0;
-        list.forEach(e=>{ if(e&&e.date&&!ids.has(e.id)){ if(!e.id) e.id='l'+Date.now()+Math.random().toString(36).slice(2,6); entries.push(e); n++; } });
-        saveLocal(); render(); st2(n+' crise(s) importée(s).');
-      }catch(e){ st2("Ce fichier n'est pas une sauvegarde du carnet."); }
-      ev.target.value='';
-    };
-    r.readAsText(f);
-  };
-  if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}); }catch(e){} }
+  $('#dCancel').onclick=closeDose;
+  if($('#dDel')) $('#dDel').onclick=()=>{form.meds=form.meds.filter(x=>x.id!==editingDose.id);closeDose();};
+  paintDose(); renderDoses();
+}
+function paintDose(){
+  $$('#dName .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===editingDose.name)));
+  $$('#dEffect .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===editingDose.effect)));
+}
+function closeDose(){editingDose=null;$('#doseEditor').hidden=true;$('#doseEditor').innerHTML='';renderDoses();}
+$('#addDose').onclick=()=>startDose(null);
+
+$('#saveBtn').onclick=()=>{
+  if(editingDose){toast('Valide ou annule la prise de médicament en cours.');return;}
+  form.date=$('#fDate').value; form.start=$('#fStart').value; form.end=$('#fEnd').value; form.notes=$('#fNotes').value.trim();
+  if(!form.date){toast('Indique la date.');return;}
+  if(!form.intensity){toast("Choisis l'intensité de 1 à 10.");$('#fScale').scrollIntoView({block:'center'});return;}
+  if(form.endMode==='time'&&!form.end){toast("Indique l'heure de fin, ou choisis « En cours ».");return;}
+  if(form.endMode!=='time') form.end='';
+  const now=Date.now(), isNew=!form.id;
+  if(isNew){form.id=uid();form.created=now;entries.push(form);} else {form.updated=now;const i=entries.findIndex(x=>x.id===form.id);entries[i]=form;}
+  if(!save()) return;
+  flashId=form.id; closeSheet('formSheet');
+  toast(isNew?'Crise enregistrée':'Modifications enregistrées');
+  calSel=form.date; calMonth=firstOfMonth(parseISO(form.date));
+  go(form.date===todayISO()?'home':'log');
+  setTimeout(()=>{const el=$('.crise.flash');if(el)el.scrollIntoView({block:'center',behavior:'smooth'});flashId=null;},150);
+};
+
+function finish(id){
+  const e=entries.find(x=>x.id===id); if(!e) return;
+  e.endMode='time'; e.end=nowHM();
+  e.updated=Date.now(); save(); toast('Crise terminée à '+e.end); render(); if(detailId===id) openDetail(id);
+}
+
+/* ---------- détail ---------- */
+function openDetail(id){
+  const e=entries.find(x=>x.id===id); if(!e) return; detailId=id;
+  $('#detailTitle').textContent=e.type==='migraine'?'Migraine':'Mal de tête';
+  const row=(k,v)=>v?`<dt>${k}</dt><dd>${v}</dd>`:'';
+  const list=a=>a&&a.length?esc(a.join(', ')):'';
+  const doses=e.meds.length?e.meds.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map(m=>`<div class="dose"><div><b>${esc(m.name)}${m.dose?' · '+esc(m.dose):''}</b><span class="small">${m.time?esc(m.time):'heure non notée'}${m.effect?' · '+esc(m.effect.toLowerCase()):''}</span></div></div>`).join(''):'<p class="small muted" style="margin:0">Aucun médicament noté.</p>';
+  $('#detailBody').innerHTML=`
+    <div class="row" style="gap:14px"><div class="pill i${lvl(e.intensity)}" style="width:64px;height:64px;font-size:1.7rem">${e.intensity||'?'}<small>/10</small></div>
+    <div class="grow"><div style="font-weight:700;font-size:1.05rem">${esc(cap(fmtDay(e.date,true)))}</div><div class="muted">${esc(timeText(e))}</div></div></div>
+    <div class="card"><h2>Médicaments et soins</h2><div class="daygroup">${doses}</div></div>
+    <div class="card"><dl class="kv" style="margin:0">
+      ${row('Où',list(e.where))}${row('Douleur',list(e.pain))}${row('Signes',list(e.symptoms))}${row('Avant',list(e.aura))}${row('Déclencheurs',list(e.triggers))}${row('Notes',esc(e.notes))}
+    </dl>${![e.where,e.pain,e.symptoms,e.aura,e.triggers].some(a=>a.length)&&!e.notes?'<p class="small muted" style="margin:0">Pas de détail noté. Touche « Modifier » pour compléter.</p>':''}</div>`;
+  const A=$('#detailActions'); A.innerHTML='';
+  const add=(cls,t,fn)=>{const b=document.createElement('button');b.type='button';b.className='btn '+cls+' grow';b.textContent=t;b.onclick=fn;A.appendChild(b);return b;};
+  add('btn-soft','+ Médicament',()=>openForm(id,true));
+  if(e.endMode==='ongoing') add('btn-main',"C'est passé",()=>finish(id));
+  const del=add('btn-danger','Supprimer',()=>{
+    if(del.dataset.armed){entries=entries.filter(x=>x.id!==id);save();closeSheet('detailSheet');toast('Crise supprimée');render();return;}
+    del.dataset.armed='1';del.textContent='Confirmer';setTimeout(()=>{delete del.dataset.armed;del.textContent='Supprimer';},3500);
+  });
+  del.classList.remove('grow');
+  openSheet('detailSheet');
+}
+$('#editBtn').onclick=()=>openForm(detailId,false);
+
+$('#fab').onclick=()=>openForm(null);
+$('#addBig').onclick=()=>openForm(null);
+
+/* ---------- export / médecin ---------- */
+function toText(){
+  const L=['CARNET DE MIGRAINES',''];
+  const s=stats30();
+  L.push('30 derniers jours : '+s.days+' jours avec douleur, '+s.mig+' migraines, '+s.ceph+' maux de tête, antidouleurs '+s.medDays+' jours, intensité moyenne '+s.avg+'/10.','');
+  [...entries].sort((a,b)=>sortKey(a).localeCompare(sortKey(b))).forEach(e=>{
+    L.push(e.date+' | '+(e.type==='migraine'?'Migraine':'Mal de tête')+' | '+timeText(e)+' | intensité '+(e.intensity||'?')+'/10');
+    if(e.meds.length) L.push('  Prises : '+e.meds.map(m=>(m.time?m.time+' ':'')+m.name+(m.dose?' '+m.dose:'')+(m.effect?' ('+m.effect.toLowerCase()+')':'')).join(' ; '));
+    if(e.where.length) L.push('  Où : '+e.where.join(', '));
+    if(e.pain.length) L.push('  Douleur : '+e.pain.join(', '));
+    if(e.symptoms.length) L.push('  Signes : '+e.symptoms.join(', '));
+    if(e.aura.length) L.push('  Avant : '+e.aura.join(', '));
+    if(e.triggers.length) L.push('  Déclencheurs : '+e.triggers.join(', '));
+    if(e.notes) L.push('  Notes : '+e.notes);
+  });
+  return L.join('\n');
+}
+$('#copyDoc').onclick=()=>{
+  const t=toText(), fb=$('#copyFallback');
+  const fallback=()=>{fb.hidden=false;fb.value=t;fb.style.minHeight='200px';fb.focus();fb.select();toast('Sélectionne le texte et copie-le');};
+  try{navigator.clipboard.writeText(t).then(()=>toast('Carnet copié')).catch(fallback);}catch(e){fallback();}
+};
+$('#exportBtn').onclick=async()=>{
+  const data=JSON.stringify({app:'migraines',version:2,exported:new Date().toISOString(),entries},null,1);
+  const name='migraines-'+todayISO()+'.json';
+  try{const f=new File([data],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Carnet de migraines'});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+};
+$('#importFile').onchange=ev=>{
+  const f=ev.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);const list=Array.isArray(d)?d:d.entries;if(!Array.isArray(list))throw 0;
+    const ids=new Set(entries.map(e=>e.id));let n=0;list.forEach(e=>{if(e&&e.date&&!ids.has(e.id)){entries.push(migrate(e));n++;}});
+    save();render();toast(n+' crise(s) importée(s)');}catch(e){toast("Ce fichier n'est pas une sauvegarde du carnet.");} ev.target.value='';};
+  r.readAsText(f);
+};
+
+save(); go('home');
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});}catch(e){}}
 })();
 </script>
-
+</body>
 </html>
