@@ -1,0 +1,17 @@
+{
+  "name": "Migraines",
+  "short_name": "Migraines",
+  "description": "Carnet de migraines : crises, médicaments, déclencheurs, bilan sur 30 jours.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f2f6",
+  "theme_color": "#2a2338",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon-180.png?v=1", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png?v=1", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?v=1", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
