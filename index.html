@@ -18,6 +18,7 @@
   --p1:#d9ecdf; --p1f:#2f6a4a; --p2:#f6ecc8; --p2f:#7a5d0e; --p3:#f8dcc8; --p3f:#93451b; --p4:#f3c9c9; --p4f:#8e2525;
   --warn:#a4532b; --warn-soft:#f8e8de; --ok:#3f7a5c; --ok-soft:#e1f0e7;
   --mig:#6a4f8f; --ceph:#3d6f8f;
+  --head:#ddd7e8; --head2:#cdc5dc; --head-feat:#4a4458; --hot:#d2553f; --headbg:#ebe8f1;
   --sans:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
   --round:"SF Pro Rounded", -apple-system, system-ui, "Segoe UI", sans-serif;
   --tabh:64px;
@@ -26,12 +27,12 @@
   --bg:#141319; --surface:#1e1d25; --surface2:#25232d; --fg:#e7e4ee; --muted:#9a96a8; --line:#33303d;
   --accent:#b9a2db; --accent-fg:#1a1622; --accent-soft:#2e2839;
   --p1:#1f3529; --p1f:#9bd3b3; --p2:#3a3218; --p2f:#e8cf7a; --p3:#40291b; --p3f:#f0ab80; --p4:#432020; --p4f:#f3a0a0;
-  --warn:#e3a07a; --warn-soft:#3a271d; --ok:#8cc5a5; --ok-soft:#1f3329; --mig:#b9a2db; --ceph:#86b8d8; color-scheme:dark}}
+  --warn:#e3a07a; --warn-soft:#3a271d; --ok:#8cc5a5; --ok-soft:#1f3329; --mig:#b9a2db; --ceph:#86b8d8; --head:#6a6479; --head2:#5c566b; --head-feat:#1c1a22; --hot:#ff7d5e; --headbg:#1a1920; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141319; --surface:#1e1d25; --surface2:#25232d; --fg:#e7e4ee; --muted:#9a96a8; --line:#33303d;
   --accent:#b9a2db; --accent-fg:#1a1622; --accent-soft:#2e2839;
   --p1:#1f3529; --p1f:#9bd3b3; --p2:#3a3218; --p2f:#e8cf7a; --p3:#40291b; --p3f:#f0ab80; --p4:#432020; --p4f:#f3a0a0;
-  --warn:#e3a07a; --warn-soft:#3a271d; --ok:#8cc5a5; --ok-soft:#1f3329; --mig:#b9a2db; --ceph:#86b8d8; color-scheme:dark}
+  --warn:#e3a07a; --warn-soft:#3a271d; --ok:#8cc5a5; --ok-soft:#1f3329; --mig:#b9a2db; --ceph:#86b8d8; --head:#6a6479; --head2:#5c566b; --head-feat:#1c1a22; --hot:#ff7d5e; --headbg:#1a1920; color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
@@ -179,6 +180,16 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 86px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-weight:600;font-size:.92rem;opacity:0;transition:all .25s;z-index:60;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 [hidden]{display:none!important}
+.headbox{position:relative;border-radius:14px;background:radial-gradient(ellipse at 50% 40%,var(--surface) 0%,var(--headbg) 75%);border:1px solid var(--line);overflow:hidden}
+.head3d{height:300px;touch-action:none;cursor:grab}
+.head3d.small{height:240px}
+.head3d canvas{display:block}
+.head3d.head-off{height:auto;padding:16px;cursor:default;color:var(--muted);font-size:.9rem}
+.headtip{position:absolute;left:10px;top:10px;background:var(--fg);color:var(--bg);font-size:.82rem;font-weight:600;padding:5px 10px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 20px)}
+.headtip.show{opacity:.92}
+.headhint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:.75rem;color:var(--muted);pointer-events:none}
+.views{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.views button{flex:1 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.84rem;font-weight:600;min-height:34px;color:var(--fg)}
 .cal button.i1,.scale button.i1{background:var(--p1);color:var(--p1f)} .cal button.i2,.scale button.i2{background:var(--p2);color:var(--p2f)}
 .cal button.i3,.scale button.i3{background:var(--p3);color:var(--p3f)} .cal button.i4,.scale button.i4{background:var(--p4);color:var(--p4f)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
@@ -258,6 +269,7 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
       <div class="bars" id="bars"></div>
       <div class="axis"><span id="axL"></span><span>aujourd'hui</span></div>
     </div>
+    <div class="card" id="whereCard"><h2>Où ça fait mal le plus souvent</h2><div id="statsHeadSlot"></div><p class="small muted" style="margin:0">Plus la zone est rouge, plus elle revient souvent.</p><div class="rank" id="rWhere"></div></div>
     <div class="card"><h2>Déclencheurs les plus fréquents</h2><div class="rank" id="rTrig"></div></div>
     <div class="card"><h2>Symptômes les plus fréquents</h2><div class="rank" id="rSym"></div></div>
     <div class="card"><h2>Médicaments</h2><div class="rank" id="rMed"></div></div>
@@ -353,6 +365,8 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
 
 <div class="toast" id="toast" role="status"></div>
 
+<script src="three.min.js"></script>
+<script src="head3d.js?v=2"></script>
 <script>
 (function(){
 'use strict';
@@ -367,7 +381,7 @@ const MEDS=[
 const NOT_ANALGESIC=new Set(MEDS.filter(m=>!m.a).map(m=>m.n));
 const EFFECTS=['Je ne sais pas encore','Aucun effet','Un peu soulagé','Bien soulagé'];
 const GROUPS=[
-  {k:'where',t:'Où ça fait mal',h:'Touche tous les endroits concernés.',o:['Côté gauche','Côté droit','Les deux côtés','Front','Tempes','Derrière les yeux','Sommet du crâne','Arrière du crâne','Nuque','Mâchoire / visage']},
+  {k:'where',t:'Où ça fait mal',h:'Touche la tête pour marquer chaque endroit douloureux (touche encore pour enlever). Fais-la tourner avec le doigt. Tu peux aussi choisir dans la liste.',o:(window.Head3D?Head3D.ZONES.map(z=>z.l).concat([Head3D.ALL]):['Côté gauche','Côté droit','Front','Tempes','Derrière les yeux','Sommet du crâne','Arrière du crâne','Nuque','Mâchoire, visage'])},
   {k:'pain',t:'Type de douleur',h:'Comment tu décrirais la douleur ?',o:['Ça pulse, ça bat','Serrement, comme un étau','Pression, tête lourde','Coup de poignard','Brûlure','Douleur sourde, de fond','Change de côté']},
   {k:'symptoms',t:'Signes associés',h:'Ce que tu ressens en même temps que la douleur.',o:['Nausées','Vomissements','Gêné par la lumière','Gêné par le bruit','Gêné par les odeurs','Pire quand je bouge','Vertiges','Grosse fatigue','Difficulté à me concentrer','Œil qui coule ou rouge','Nez bouché ou qui coule','Cou ou nuque raide','Mal aux yeux','Pâleur, froid','Besoin de m\'allonger dans le noir']},
   {k:'aura',t:'Avant la crise',h:'Signes dans les minutes ou heures avant. Les troubles visuels qui précèdent s\'appellent une aura.',o:['Zigzags ou taches lumineuses','Vision floue ou trouée','Fourmillements','Mots qui ne viennent pas','Bâillements','Envie de sucré','Irritabilité','Raideur du cou avant','Rien de particulier']},
@@ -586,6 +600,11 @@ function renderStats(){
   const d0=new Date(); d0.setDate(d0.getDate()-29); $('#axL').textContent=d0.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
   const ct=k=>{const c={};s.r.forEach(e=>(e[k]||[]).forEach(x=>c[x]=(c[x]||0)+1));return c;};
   rank($('#rTrig'),ct('triggers'),'Pas encore de déclencheur noté.');
+  { const counts={}, wc={};
+    s.r.forEach(e=>{ (e.where||[]).forEach(l=>wc[l]=(wc[l]||0)+1); if(window.Head3D) Head3D.idsFromLabels(e.where).forEach(id=>counts[id]=(counts[id]||0)+1); });
+    rank($('#rWhere'),wc,'Pas encore de zone notée. Marque-les sur la tête quand tu notes une crise.');
+    const slot=$('#statsHeadSlot'); if(!slot.firstChild) slot.appendChild(statsHead.wrap);
+    const hv=statsHead.get(); if(hv&&hv.ok){ hv.setHeat(counts); hv.resize(); } }
   const sy={}; s.r.forEach(e=>[...e.symptoms,...e.pain].forEach(x=>sy[x]=(sy[x]||0)+1)); rank($('#rSym'),sy,'Pas encore de symptôme noté.');
   const md={}; s.r.forEach(e=>e.meds.forEach(m=>md[m.name]=(md[m.name]||0)+1)); rank($('#rMed'),md,'Aucun médicament noté.');
 }
@@ -595,6 +614,35 @@ function render(){ if(tab==='home')renderHome(); else if(tab==='log')renderLog()
 function openSheet(id){const s=$('#'+id);s.classList.add('open');s.querySelector('.body').scrollTop=0;document.body.style.overflow='hidden';}
 function closeSheet(id){$('#'+id).classList.remove('open');if(!$$('.sheet.open').length)document.body.style.overflow='';}
 $$('[data-close]').forEach(b=>b.onclick=()=>closeSheet(b.dataset.close));
+
+/* ---------- tête 3D ---------- */
+function mountHead(cls,mode,onToggle){
+  const box=document.createElement('div'); box.className='headbox';
+  const host=document.createElement('div'); host.className='head3d'+(cls?' '+cls:'');
+  const tip=document.createElement('div'); tip.className='headtip';
+  const hint=document.createElement('div'); hint.className='headhint';
+  hint.textContent=mode==='edit'?'Touche pour marquer · glisse pour tourner':'Glisse pour tourner';
+  box.append(host,tip,hint);
+  const views=document.createElement('div'); views.className='views';
+  [['face','Face'],['gauche','Ta gauche'],['droite','Ta droite'],['dos','Dos'],['dessus','Dessus']].forEach(([k,t])=>{
+    const b=document.createElement('button'); b.type='button'; b.textContent=t; b.onclick=()=>hv&&hv.view(k); views.appendChild(b);
+  });
+  const wrap=document.createElement('div'); wrap.className='screen'; wrap.style.gap='8px'; wrap.append(box,views);
+  let hv=null, tipT;
+  const api={wrap,
+    get:()=>{ if(!hv&&window.Head3D){ hv=new Head3D.HeadView(host,{mode,onToggle:z=>{ if(onToggle){ const on=onToggle(z); tip.textContent=z.l+(on?' : marqué':' : retiré'); tip.classList.add('show'); clearTimeout(tipT); tipT=setTimeout(()=>tip.classList.remove('show'),1400);} }}); if(!hv.ok){views.hidden=true;hint.hidden=true;} } return hv; }
+  };
+  if(!window.Head3D){ host.classList.add('head-off'); host.textContent='La vue 3D ne peut pas s\u2019afficher. Utilise la liste.'; views.hidden=true; hint.hidden=true; }
+  return api;
+}
+const formHead=mountHead('', 'edit', z=>{
+  let w=form.where;
+  if(window.Head3D&&w.includes(Head3D.ALL)){ w=form.where=Head3D.ZONES.map(x=>x.l).concat(w.filter(l=>l!==Head3D.ALL&&!Head3D.BY_LABEL[l])); }
+  const i=w.indexOf(z.l); if(i>=0) w.splice(i,1); else w.push(z.l);
+  paintGroups(); return i<0;
+});
+const detailHead=mountHead('small','view');
+const statsHead=mountHead('small','view');
 
 /* ---------- formulaire ---------- */
 const scale=$('#fScale');
@@ -606,12 +654,14 @@ GROUPS.forEach(G=>{
   const d=document.createElement('details'); d.className='grp'; d.dataset.k=G.k; d.style.marginBottom='16px';
   d.innerHTML=`<summary>${esc(G.t)} <span class="cnt"></span></summary><div class="in"><p class="help" style="margin:0">${esc(G.h)}</p><div class="chips"></div></div>`;
   const c=d.querySelector('.chips');
+  if(G.k==='where'){ d.open=true; d.querySelector('.in').insertBefore(formHead.wrap,c); d.addEventListener('toggle',()=>{const hv=formHead.get(); if(hv&&hv.ok) hv.resize();}); }
   G.o.forEach(o=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=o;b.onclick=()=>{
     const arr=form[G.k]; const i=arr.indexOf(o); if(i>=0)arr.splice(i,1); else arr.push(o); paintGroups();};c.appendChild(b);});
   sg.appendChild(d);
 });
 function paintGroups(){
   $$('details.grp[data-k]').forEach(d=>{const arr=form[d.dataset.k];d.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',String(arr.includes(b.textContent))));d.querySelector('.cnt').textContent=arr.length||'';});
+  const hv=formHead.get(); if(hv&&hv.ok&&window.Head3D) hv.setSelection(Head3D.idsFromLabels(form.where),false);
 }
 
 $('#fType').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;form.type=b.dataset.v;segSet($('#fType'),form.type);};
@@ -631,6 +681,7 @@ function openForm(id,focusMeds){
   $('#fDate').value=form.date; $('#fStart').value=form.start||''; $('#fEnd').value=form.end||''; $('#fNotes').value=form.notes||'';
   paintEnd(); paintScale(); paintGroups(); editingDose=null; renderDoses();
   closeSheet('detailSheet'); openSheet('formSheet');
+  { const hv=formHead.get(); if(hv&&hv.ok&&window.Head3D){ hv.setSelection(Head3D.idsFromLabels(form.where),true); setTimeout(()=>hv.resize(),320); } }
   if(focusMeds){ $('#gMeds').open=true; startDose(null); setTimeout(()=>$('#gMeds').scrollIntoView({block:'start'}),300); }
 }
 
@@ -719,6 +770,14 @@ function openDetail(id){
     <div class="card"><dl class="kv" style="margin:0">
       ${row('Où',list(e.where))}${row('Douleur',list(e.pain))}${row('Signes',list(e.symptoms))}${row('Avant',list(e.aura))}${row('Déclencheurs',list(e.triggers))}${row('Notes',esc(e.notes))}
     </dl>${![e.where,e.pain,e.symptoms,e.aura,e.triggers].some(a=>a.length)&&!e.notes?'<p class="small muted" style="margin:0">Pas de détail noté. Touche « Modifier » pour compléter.</p>':''}</div>`;
+  const zids=window.Head3D?Head3D.idsFromLabels(e.where):[];
+  if(zids.length){
+    const card=document.createElement('div'); card.className='card';
+    const h2=document.createElement('h2'); h2.textContent='Où ça fait mal';
+    const pl=document.createElement('p'); pl.className='small muted'; pl.style.margin='0'; pl.textContent=e.where.join(', ');
+    card.append(h2,detailHead.wrap,pl);
+    $('#detailBody').insertBefore(card,$('#detailBody').children[1]);
+  }
   const A=$('#detailActions'); A.innerHTML='';
   const add=(cls,t,fn)=>{const b=document.createElement('button');b.type='button';b.className='btn '+cls+' grow';b.textContent=t;b.onclick=fn;A.appendChild(b);return b;};
   add('btn-soft','+ Médicament',()=>openForm(id,true));
@@ -729,6 +788,7 @@ function openDetail(id){
   });
   del.classList.remove('grow');
   openSheet('detailSheet');
+  if(zids.length){ const hv=detailHead.get(); if(hv&&hv.ok){ hv.setSelection(zids,true); setTimeout(()=>hv.resize(),320); } }
 }
 $('#editBtn').onclick=()=>openForm(detailId,false);
 
