@@ -150,7 +150,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 /* formulaire */
 .field{display:flex;flex-direction:column;gap:7px;min-width:0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-input[type=date],input[type=time],input[type=text],textarea{width:100%;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:46px;-webkit-appearance:none;appearance:none}
+input[type=date],input[type=time],input[type=text],input[type=password],textarea{width:100%;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:46px;-webkit-appearance:none;appearance:none}
 textarea{min-height:80px;resize:vertical}
 .scale{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
 .scale button{min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-variant-numeric:tabular-nums;padding:0}
@@ -180,6 +180,8 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 86px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:999px;font-weight:600;font-size:.92rem;opacity:0;transition:all .25s;z-index:60;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 [hidden]{display:none!important}
+.syncpill{font-size:.74rem;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.syncpill.ok{background:var(--ok-soft);color:var(--ok)} .syncpill.err{background:var(--warn-soft);color:var(--warn)} .syncpill:empty{display:none}
 .headbox{position:relative;border-radius:14px;background:radial-gradient(ellipse at 50% 40%,var(--surface) 0%,var(--headbg) 75%);border:1px solid var(--line);overflow:hidden}
 .head3d{height:300px;touch-action:none;cursor:grab}
 .head3d.small{height:240px}
@@ -202,6 +204,7 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
   <section class="screen" id="v-home">
     <div class="top">
       <div><h1>Migraines</h1><p class="sub" id="todayLabel"></p></div>
+      <button class="syncpill" id="syncPill" type="button" data-go="stats" style="border:0"></button>
     </div>
     <button class="btn btn-main btn-big" id="addBig" type="button">+ Noter une crise</button>
     <div id="liveBox" class="screen" style="gap:10px"></div>
@@ -279,9 +282,42 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
       <button class="btn btn-main" type="button" id="copyDoc">Copier le carnet</button>
       <textarea id="copyFallback" hidden readonly aria-label="Texte du carnet"></textarea>
     </div>
+    <div class="card" id="exportCard">
+      <h2>Exporter en tableau</h2>
+      <p class="small muted" style="margin:0">Un fichier Excel avec toutes les colonnes, ou un PDF propre à imprimer ou envoyer au médecin.</p>
+      <div class="field">
+        <span class="lbl">Période</span>
+        <div class="seg" id="expRange" role="group" aria-label="Période">
+          <button type="button" data-v="30" aria-pressed="true">30 jours</button>
+          <button type="button" data-v="90" aria-pressed="false">3 mois</button>
+          <button type="button" data-v="all" aria-pressed="false">Tout</button>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn btn-main grow" type="button" id="xlsxBtn">Excel</button>
+        <button class="btn btn-main grow" type="button" id="pdfBtn">PDF</button>
+      </div>
+    </div>
+    <div class="card" id="syncCard">
+      <div class="row" style="justify-content:space-between"><h2>Sauvegarde sécurisée</h2><span class="syncpill" id="syncPill2"></span></div>
+      <div id="syncOff">
+        <p class="small muted" style="margin:0 0 10px">Tes crises sont envoyées sur un serveur, <strong>chiffrées sur ton téléphone</strong> avec un mot de passe que toi seul connais. Le serveur ne voit qu'un bloc illisible. Le même mot de passe sur un autre téléphone retrouve tes données.</p>
+        <div class="field"><label class="lbl" for="syncPass">Mot de passe du coffre</label><input type="password" id="syncPass" autocomplete="new-password" placeholder="8 caractères minimum"></div>
+        <div class="field" style="margin-top:10px"><label class="lbl" for="syncPass2">Confirme le mot de passe</label><input type="password" id="syncPass2" autocomplete="new-password"></div>
+        <p class="small" style="margin:10px 0;color:var(--warn)">Note-le bien : sans lui, personne ne peut récupérer les données du serveur, même pas moi.</p>
+        <button class="btn btn-main" type="button" id="syncOn" style="width:100%">Activer la sauvegarde</button>
+      </div>
+      <div id="syncOnBox" hidden>
+        <p class="small muted" style="margin:0" id="syncInfo"></p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-soft grow" type="button" id="syncNow">Synchroniser maintenant</button>
+          <button class="btn btn-line" type="button" id="syncOffBtn">Déconnecter</button>
+        </div>
+      </div>
+    </div>
     <div class="card">
-      <h2>Sauvegarde</h2>
-      <p class="small muted" style="margin:0">Tes crises restent uniquement sur ce téléphone. Exporte de temps en temps pour ne rien perdre.</p>
+      <h2>Copie de secours</h2>
+      <p class="small muted" style="margin:0">Fichier de sauvegarde à garder où tu veux (Fichiers, iCloud, mail).</p>
       <div class="row">
         <button class="btn btn-line grow" type="button" id="exportBtn">Exporter</button>
         <label class="btn btn-line grow" for="importFile">Importer</label>
@@ -411,7 +447,9 @@ function migrate(e){
   delete o.medtime; delete o.effect;
   return o;
 }
-function save(){ try{localStorage.setItem(KEY,JSON.stringify(entries)); return true;}catch(e){ toast("Impossible d'enregistrer sur ce téléphone (stockage plein ou navigation privée)."); return false; } }
+let tomb={}; try{tomb=JSON.parse(localStorage.getItem('migraines.tomb')||'{}')||{};}catch(e){}
+function forget(id){ tomb[id]=Date.now(); try{localStorage.setItem('migraines.tomb',JSON.stringify(tomb));}catch(e){} }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(entries)); if(window.Sync) Sync.soon(); return true;}catch(e){ toast("Impossible d'enregistrer sur ce téléphone (stockage plein ou navigation privée)."); return false; } }
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 
 /* ---------- dates ---------- */
@@ -783,7 +821,7 @@ function openDetail(id){
   add('btn-soft','+ Médicament',()=>openForm(id,true));
   if(e.endMode==='ongoing') add('btn-main',"C'est passé",()=>finish(id));
   const del=add('btn-danger','Supprimer',()=>{
-    if(del.dataset.armed){entries=entries.filter(x=>x.id!==id);save();closeSheet('detailSheet');toast('Crise supprimée');render();return;}
+    if(del.dataset.armed){forget(id);entries=entries.filter(x=>x.id!==id);save();closeSheet('detailSheet');toast('Crise supprimée');render();return;}
     del.dataset.armed='1';del.textContent='Confirmer';setTimeout(()=>{delete del.dataset.armed;del.textContent='Supprimer';},3500);
   });
   del.classList.remove('grow');
@@ -831,7 +869,189 @@ $('#importFile').onchange=ev=>{
   r.readAsText(f);
 };
 
-save(); go('home');
+/* ---------- sauvegarde sécurisée (Supabase, chiffré sur le téléphone) ---------- */
+const SB={url:'https://jwoqkbrwzborlgphfnqu.supabase.co',key:'sb_publishable_H0CgHvla4pRK5Xn_sAIFag_lqTGbFe1'};
+const enc8=new TextEncoder(), dec8=new TextDecoder();
+function b64(buf){let s='';const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);}
+function unb64(s){const bin=atob(s),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
+async function pbkdf(pass,salt){const k=await crypto.subtle.importKey('raw',enc8.encode(pass),'PBKDF2',false,['deriveBits']);
+  return crypto.subtle.deriveBits({name:'PBKDF2',salt:enc8.encode(salt),iterations:250000,hash:'SHA-256'},k,256);}
+async function deriveSecrets(pass){const raw=await pbkdf(pass,'migraines-coffre-cle-v1'), idb=await pbkdf(pass,'migraines-coffre-id-v1');
+  return {key:b64(raw),hid:[...new Uint8Array(idb)].map(x=>x.toString(16).padStart(2,'0')).join('')};}
+async function aesKey(k64){return crypto.subtle.importKey('raw',unb64(k64),'AES-GCM',false,['encrypt','decrypt']);}
+async function gz(bytes,dir){const cs=dir?new CompressionStream('gzip'):new DecompressionStream('gzip');return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(cs)).arrayBuffer());}
+async function seal(obj,k64){let bytes=enc8.encode(JSON.stringify(obj)),z=false;
+  if(window.CompressionStream){try{bytes=await gz(bytes,true);z=true;}catch(e){}}
+  const iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await aesKey(k64),bytes);
+  return {iv:b64(iv),d:b64(ct),z};}
+async function unseal(doc,k64){let bytes=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(doc.iv)},await aesKey(k64),unb64(doc.d)));
+  if(doc.z)bytes=await gz(bytes,false);return JSON.parse(dec8.decode(bytes));}
+async function rpc(fn,args){const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',cache:'no-store',headers:{'apikey':SB.key,'Content-Type':'application/json'},body:JSON.stringify(args)});
+  if(!r.ok)throw new Error('serveur '+r.status);return r.json();}
+const stamp=e=>e.updated||e.created||0;
+function mergeData(remote){
+  // fusion par crise : la version la plus récente gagne, les suppressions sont propagées
+  const T=Object.assign({},remote.tomb||{}); Object.entries(tomb).forEach(([k,v])=>{if(!T[k]||v>T[k])T[k]=v;});
+  const M=new Map();
+  (remote.entries||[]).concat(entries).forEach(e=>{if(!e||!e.id)return;const o=M.get(e.id);if(!o||stamp(e)>stamp(o))M.set(e.id,e);});
+  const out=[...M.values()].filter(e=>!(T[e.id]&&T[e.id]>=stamp(e))).map(migrate);
+  return {entries:out,tomb:T};
+}
+const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const canon=d=>({entries:[...d.entries].sort((a,b)=>a.id<b.id?-1:1),tomb:Object.fromEntries(Object.entries(d.tomb).sort())});
+window.Sync={
+  cfg:null, busy:false, again:false, t:null, last:null, state:'off',
+  init(){ try{this.cfg=JSON.parse(localStorage.getItem('migraines.sync')||'null');}catch(e){} this.paint();
+    if(this.cfg){ this.run(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')this.run();}); window.addEventListener('online',()=>this.run()); } },
+  saveCfg(){ try{ if(this.cfg)localStorage.setItem('migraines.sync',JSON.stringify(this.cfg)); else localStorage.removeItem('migraines.sync'); }catch(e){} },
+  soon(){ if(!this.cfg)return; clearTimeout(this.t); this.t=setTimeout(()=>this.run(),1200); },
+  status(s){ this.state=s; this.paint(); },
+  paint(){
+    const txt={off:'',ok:'☁︎ Sauvegardé',sync:'☁︎ Envoi…',offline:'Hors ligne',err:'Erreur de sauvegarde'}[this.state]||'';
+    ['#syncPill','#syncPill2'].forEach(s=>{const el=$(s);if(!el)return;el.textContent=this.cfg?txt:'';el.className='syncpill'+(this.state==='ok'?' ok':this.state==='err'?' err':'');});
+    $('#syncOff').hidden=!!this.cfg; $('#syncOnBox').hidden=!this.cfg;
+    if(this.cfg) $('#syncInfo').textContent=this.last?'Dernière synchronisation : '+this.last.toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'. Chaque crise notée part automatiquement.':'Chaque crise notée part automatiquement sur le serveur, chiffrée.';
+  },
+  async run(){
+    if(!this.cfg) return;
+    if(this.busy){this.again=true;return;}
+    if(!navigator.onLine){this.status('offline');return;}
+    this.busy=true; this.status('sync');
+    try{
+      for(let attempt=0;attempt<4;attempt++){
+        const rows=await rpc('migraines_get',{p_hid:this.cfg.hid}); const row=rows&&rows[0];
+        let remote={entries:[],tomb:{}}, ver=0;
+        if(row){ remote=await unseal(row,this.cfg.key); ver=row.v; }
+        const merged=mergeData(remote);
+        // applique localement
+        if(!same(canon({entries:entries,tomb}),canon(merged))){ entries=merged.entries; tomb=merged.tomb;
+          try{localStorage.setItem(KEY,JSON.stringify(entries));localStorage.setItem('migraines.tomb',JSON.stringify(tomb));}catch(e){} render(); }
+        if(row&&same(canon(remote.entries?{entries:remote.entries.map(migrate),tomb:remote.tomb||{}}:remote),canon(merged))){ break; }
+        const ok=await rpc('migraines_cas',Object.assign({p_hid:this.cfg.hid,p_expected:ver},(s=>({p_iv:s.iv,p_d:s.d,p_z:s.z}))(await seal(merged,this.cfg.key))));
+        if(ok) break;
+        if(attempt===3) throw new Error('conflit');
+      }
+      this.last=new Date(); this.status('ok');
+    }catch(e){ this.status(navigator.onLine?'err':'offline'); }
+    this.busy=false;
+    if(this.again){this.again=false;this.run();}
+  },
+  async enable(pass){
+    if(!(window.crypto&&crypto.subtle)) throw new Error('crypto');
+    const sec=await deriveSecrets(pass);
+    // si un coffre existe déjà avec ce mot de passe, on vérifie qu'il s'ouvre
+    const rows=await rpc('migraines_get',{p_hid:sec.hid});
+    if(rows&&rows[0]){ await unseal(rows[0],sec.key); }
+    this.cfg={hid:sec.hid,key:sec.key}; this.saveCfg(); this.paint();
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')this.run();});
+    await this.run(); return rows&&rows[0]?'found':'new';
+  },
+  disable(){ this.cfg=null; this.saveCfg(); this.state='off'; this.paint(); }
+};
+$('#syncOn').onclick=async()=>{
+  const p1=$('#syncPass').value, p2=$('#syncPass2').value;
+  if(p1.length<8){toast('Choisis au moins 8 caractères.');return;}
+  if(p1!==p2){toast('Les deux mots de passe ne sont pas identiques.');return;}
+  const b=$('#syncOn'); b.disabled=true; b.textContent='Chiffrement…';
+  try{ const r=await Sync.enable(p1); $('#syncPass').value=''; $('#syncPass2').value='';
+    toast(r==='found'?'Coffre retrouvé, tes crises sont fusionnées':'Sauvegarde activée'); }
+  catch(e){ toast(navigator.onLine?'Impossible d\u2019activer : vérifie le mot de passe ou réessaie.':'Pas de réseau. Réessaie quand tu es connecté.'); }
+  b.disabled=false; b.textContent='Activer la sauvegarde';
+};
+$('#syncNow').onclick=()=>Sync.run().then(()=>toast(Sync.state==='ok'?'Synchronisé':'La synchronisation n\u2019a pas abouti'));
+$('#syncOffBtn').onclick=function(){
+  if(!this.dataset.armed){this.dataset.armed='1';this.textContent='Confirmer';setTimeout(()=>{delete this.dataset.armed;this.textContent='Déconnecter';},3500);return;}
+  Sync.disable(); toast('Ce téléphone n\u2019envoie plus rien. Tes crises restent ici et sur le serveur.');
+};
+
+/* ---------- exports Excel et PDF ---------- */
+function loadScript(src){return new Promise((ok,ko)=>{if(document.querySelector('script[data-src="'+src+'"]'))return ok();const s=document.createElement('script');s.src=src;s.dataset.src=src;s.onload=()=>ok();s.onerror=()=>{s.remove();ko(new Error(src));};document.head.appendChild(s);});}
+$('#expRange').onclick=ev=>{const b=ev.target.closest('button');if(b)segSet($('#expRange'),b.dataset.v);};
+function exportSet(){
+  const v=segGet($('#expRange'))||'30';
+  let list=[...entries].sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
+  let label='Toutes les crises';
+  if(v!=='all'){const c=new Date();c.setDate(c.getDate()-(+v-1));const cs=iso(c);list=list.filter(e=>e.date>=cs);label=(v==='30'?'30 derniers jours':'3 derniers mois')+' (depuis le '+parseISO(cs).toLocaleDateString('fr-FR')+')';}
+  return {list,label,v};
+}
+const typeTxt=e=>e.type==='migraine'?'Migraine':'Mal de tête';
+const endTxt=e=>e.endMode==='ongoing'?'en cours':e.endMode==='allday'?'toute la journée':e.endMode==='time'?(e.end||''):'';
+const medsTxt=(e,sep)=>e.meds.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map(m=>(m.time?m.time+' ':'')+m.name+(m.dose?' '+m.dose:'')+(m.effect&&m.effect!=='Je ne sais pas encore'?' ('+m.effect.toLowerCase()+')':'')).join(sep);
+function summaryOf(list){
+  const days=new Set(list.map(e=>e.date)), medDays=new Set(list.filter(e=>e.meds.some(m=>!NOT_ANALGESIC.has(m.name))).map(e=>e.date));
+  const wi=list.filter(e=>e.intensity), durs=list.map(duration).filter(x=>x!=null);
+  const cnt=k=>{const c={};list.forEach(e=>(e[k]||[]).forEach(x=>c[x]=(c[x]||0)+1));return Object.entries(c).sort((a,b)=>b[1]-a[1]);};
+  return {n:list.length,days:days.size,medDays:medDays.size,mig:list.filter(e=>e.type==='migraine').length,ceph:list.filter(e=>e.type!=='migraine').length,
+    avg:wi.length?+(wi.reduce((a,e)=>a+e.intensity,0)/wi.length).toFixed(1):null,dur:durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):null,
+    trig:cnt('triggers'),where:cnt('where'),sym:cnt('symptoms')};
+}
+async function deliver(blob,name,title){
+  try{const f=new File([blob],name,{type:blob.type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);
+}
+$('#xlsxBtn').onclick=async()=>{
+  const {list,label}=exportSet(); if(!list.length){toast('Aucune crise sur cette période.');return;}
+  const b=$('#xlsxBtn'); b.disabled=true; b.textContent='Préparation…';
+  try{
+    await loadScript('lib/xlsx.mini.min.js');
+    const rows=list.map(e=>({'Date':parseISO(e.date),'Jour':cap(parseISO(e.date).toLocaleDateString('fr-FR',{weekday:'long'})),'Type':typeTxt(e),'Début':e.start||'','Fin':endTxt(e),
+      'Durée (min)':duration(e)??'','Intensité /10':e.intensity||'','Où':e.where.join(', '),'Type de douleur':e.pain.join(', '),'Signes associés':e.symptoms.join(', '),
+      'Avant la crise':e.aura.join(', '),'Déclencheurs':e.triggers.join(', '),'Nb de prises':e.meds.length,'Médicaments':medsTxt(e,' ; '),'Notes':e.notes||''}));
+    const ws=XLSX.utils.json_to_sheet(rows,{cellDates:true,dateNF:'dd/mm/yyyy'});
+    ws['!cols']=[12,10,12,7,14,10,10,28,24,30,24,30,9,40,30].map(w=>({wch:w}));
+    ws['!autofilter']={ref:ws['!ref']};
+    const meds=[]; list.forEach(e=>e.meds.forEach(m=>meds.push({'Date':parseISO(e.date),'Crise':typeTxt(e)+(e.start?' de '+e.start:''),'Heure de prise':m.time||'','Médicament':m.name,'Dose':m.dose||'','Effet':m.effect||''})));
+    const ws2=XLSX.utils.json_to_sheet(meds.length?meds:[{'Date':'','Crise':'','Heure de prise':'','Médicament':'Aucune prise notée','Dose':'','Effet':''}],{cellDates:true,dateNF:'dd/mm/yyyy'});
+    ws2['!cols']=[12,22,14,28,12,22].map(w=>({wch:w}));
+    const s=summaryOf(list);
+    const sum=[['Carnet de migraines'],['Période',label],['Exporté le',new Date().toLocaleDateString('fr-FR')],[],
+      ['Crises notées',s.n],['Migraines',s.mig],['Maux de tête',s.ceph],['Jours avec douleur',s.days],['Jours avec antidouleur',s.medDays],
+      ['Intensité moyenne /10',s.avg??''],['Durée moyenne (min)',s.dur??''],[],['Déclencheurs','Nombre de fois'],...s.trig.slice(0,10),[],['Zones douloureuses','Nombre de fois'],...s.where.slice(0,10)];
+    const ws3=XLSX.utils.aoa_to_sheet(sum); ws3['!cols']=[{wch:30},{wch:40}];
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Crises'); XLSX.utils.book_append_sheet(wb,ws2,'Médicaments'); XLSX.utils.book_append_sheet(wb,ws3,'Bilan');
+    const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    await deliver(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'migraines-'+todayISO()+'.xlsx','Carnet de migraines');
+  }catch(e){toast('L\u2019export Excel n\u2019a pas marché. Vérifie ta connexion la première fois.');}
+  b.disabled=false; b.textContent='Excel';
+};
+const pdfTxt=s=>String(s==null?'':s).replace(/→/g,'-').replace(/[^\x00-\xFF\u0152\u0153\u2019\u2026\u20AC]/g,'');
+$('#pdfBtn').onclick=async()=>{
+  const {list,label}=exportSet(); if(!list.length){toast('Aucune crise sur cette période.');return;}
+  const b=$('#pdfBtn'); b.disabled=true; b.textContent='Préparation…';
+  try{
+    await loadScript('lib/jspdf.umd.min.js'); await loadScript('lib/jspdf.plugin.autotable.min.js');
+    const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const W=doc.internal.pageSize.getWidth(), s=summaryOf(list), violet=[106,79,143];
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(35,33,44); doc.text('Carnet de migraines',14,18);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(107,104,120);
+    doc.text(pdfTxt(label+'  ·  exporté le '+new Date().toLocaleDateString('fr-FR')).replace('·','-'),14,25);
+    const boxes=[['Crises',s.n],['Migraines',s.mig],['Maux de tête',s.ceph],['Jours avec douleur',s.days],['Jours avec antidouleur',s.medDays],['Intensité moyenne',s.avg!=null?String(s.avg).replace('.',',')+' /10':'-'],['Durée moyenne',s.dur!=null?fmtDur(s.dur):'-']];
+    const bw=(W-28-6*4)/7;
+    boxes.forEach((x,i)=>{const X=14+i*(bw+4);doc.setFillColor(243,242,246);doc.roundedRect(X,30,bw,18,2,2,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(35,33,44);doc.text(pdfTxt(String(x[1])),X+4,38);
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(107,104,120);doc.text(pdfTxt(x[0]),X+4,44);});
+    let y=54;
+    const line=(t,c)=>{doc.setFontSize(9);doc.setTextColor(...(c||[60,58,70]));const L=doc.splitTextToSize(pdfTxt(t),W-28);doc.text(L,14,y);y+=L.length*4.4;};
+    if(s.trig.length) line('Déclencheurs fréquents : '+s.trig.slice(0,6).map(([k,n])=>k.toLowerCase()+' ('+n+')').join(', ')+'.');
+    if(s.where.length) line('Zones fréquentes : '+s.where.slice(0,6).map(([k,n])=>k.toLowerCase()+' ('+n+')').join(', ')+'.');
+    if(s.medDays>=10) line('Antidouleurs pris '+s.medDays+' jours sur la période : risque de céphalées par abus médicamenteux à évoquer.',[164,83,43]);
+    doc.autoTable({startY:y+2,margin:{left:14,right:14},
+      head:[['Date','Horaire','Type','Int.','Médicaments (heure, effet)','Où','Douleur et signes','Déclencheurs','Notes']],
+      body:list.map(e=>[parseISO(e.date).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit'}),
+        (e.start||'?')+(e.endMode==='time'&&e.end?' - '+e.end+(duration(e)!=null?'\n'+fmtDur(duration(e)):''):e.endMode==='allday'?'\njournée':e.endMode==='ongoing'?'\nen cours':''),
+        typeTxt(e),String(e.intensity||'?'),medsTxt(e,'\n')||'-',e.where.join(', ')||'-',[...e.pain,...e.symptoms].join(', ')||'-',e.triggers.join(', ')||'-',(e.aura.length?'Avant : '+e.aura.join(', ')+(e.notes?'\n':''):'')+(e.notes||'')].map(pdfTxt)),
+      styles:{font:'helvetica',fontSize:8,cellPadding:2,textColor:[35,33,44],lineColor:[226,224,233],lineWidth:0.2,valign:'top'},
+      headStyles:{fillColor:violet,textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[248,247,251]},
+      columnStyles:{0:{cellWidth:20},1:{cellWidth:20},2:{cellWidth:19},3:{cellWidth:10,halign:'center',fontStyle:'bold'},4:{cellWidth:46},5:{cellWidth:34},6:{cellWidth:46},7:{cellWidth:36}},
+      didParseCell:d=>{ if(d.section==='body'&&d.column.index===3){const i=+d.cell.raw||0;d.cell.styles.fillColor=i>=8?[243,201,201]:i>=6?[248,220,200]:i>=4?[246,236,200]:i?[217,236,223]:[248,247,251];} },
+      didDrawPage:()=>{const H=doc.internal.pageSize.getHeight();doc.setFontSize(8);doc.setTextColor(150,147,160);doc.text('Page '+doc.internal.getNumberOfPages(),W-14,H-8,{align:'right'});doc.text('Carnet de migraines',14,H-8);}
+    });
+    await deliver(doc.output('blob'),'migraines-'+todayISO()+'.pdf','Carnet de migraines');
+  }catch(e){toast('L\u2019export PDF n\u2019a pas marché. Vérifie ta connexion la première fois.');}
+  b.disabled=false; b.textContent='PDF';
+};
+
+save(); go('home'); Sync.init();
 if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});}catch(e){}}
 })();
 </script>
