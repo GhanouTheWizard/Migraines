@@ -4,12 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2a2338">
+<meta name="theme-color" content="#211b30">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Aura">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <title>Aura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap">
 <style>
 /* Appli à onglets : Accueil, Journal, Calendrier, Bilan. Saisie dans une feuille plein écran. Couleurs douces pour les yeux sensibles. */
 :root{
@@ -194,6 +196,66 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
 .views button{flex:1 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.84rem;font-weight:600;min-height:34px;color:var(--fg)}
 .cal button.i1,.scale button.i1{background:var(--p1);color:var(--p1f)} .cal button.i2,.scale button.i2{background:var(--p2);color:var(--p2f)}
 .cal button.i3,.scale button.i3{background:var(--p3);color:var(--p3f)} .cal button.i4,.scale button.i4{background:var(--p4);color:var(--p4f)}
+
+/* ===== Habillage Aura : ciel du soir, halo lumineux ===== */
+:root{
+  --bg:#f7f2f8; --surface:rgba(255,255,255,.78); --surface2:#f3ecf7; --fg:#241d33; --muted:#6f6680; --line:#e9e0ef;
+  --accent:#6b4aa8; --accent2:#c0608a; --accent-fg:#fff; --accent-soft:#efe6f8; --mig:#6b4aa8;
+  --glow1:rgba(176,132,232,.35); --glow2:rgba(240,150,170,.30); --glow3:rgba(255,200,140,.28);
+  --shadow:0 8px 28px rgba(80,50,130,.10); --grad:linear-gradient(135deg,var(--accent),var(--accent2));
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#120e1b; --surface:rgba(34,27,48,.72); --surface2:#241d33; --fg:#efe9f7; --muted:#a59cb8; --line:#352c47;
+  --accent:#b99af0; --accent2:#f08fb0; --accent-fg:#1a1324; --accent-soft:#2c2340; --mig:#b99af0;
+  --glow1:rgba(130,90,210,.30); --glow2:rgba(200,90,140,.22); --glow3:rgba(240,160,100,.14); --shadow:0 8px 28px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{
+  --bg:#120e1b; --surface:rgba(34,27,48,.72); --surface2:#241d33; --fg:#efe9f7; --muted:#a59cb8; --line:#352c47;
+  --accent:#b99af0; --accent2:#f08fb0; --accent-fg:#1a1324; --accent-soft:#2c2340; --mig:#b99af0;
+  --glow1:rgba(130,90,210,.30); --glow2:rgba(200,90,140,.22); --glow3:rgba(240,160,100,.14); --shadow:0 8px 28px rgba(0,0,0,.35)}
+body{background:var(--bg)}
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:radial-gradient(40% 32% at 18% 12%,var(--glow1),transparent 70%),radial-gradient(38% 30% at 88% 30%,var(--glow2),transparent 70%),radial-gradient(45% 35% at 50% 100%,var(--glow3),transparent 70%);
+  animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(3%,-2%,0) scale(1.06)}}
+h1{font-family:var(--display);font-weight:600;font-size:2.1rem;letter-spacing:-.01em}
+h2{font-family:var(--display);font-weight:600;font-size:1.18rem}
+.card,.crise,.tablewrap,details.grp{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.card{border-radius:22px;padding:16px}
+.crise{border-radius:18px}
+.pill{border-radius:16px}
+.stat{background:var(--surface2);border-radius:16px}
+.stat b{font-family:var(--display);font-weight:600;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn-main,.fab,.chip[aria-pressed=true]{background:var(--grad);border-color:transparent}
+.btn-main{box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.btn-big{border-radius:20px}
+.fab{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 14%,transparent),0 10px 26px color-mix(in srgb,var(--accent2) 45%,transparent)}
+.rank .bar i{background:var(--grad)}
+.seg{border-radius:14px}
+.seg button[aria-pressed=true]{background:var(--grad);color:#fff;box-shadow:none}
+nav.tabs{left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);border:1px solid var(--line);border-radius:24px;background:var(--surface);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:var(--shadow);padding:0}
+nav.tabs button[aria-current=page]{color:var(--accent)}
+nav.tabs button[aria-current=page] svg{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 55%,transparent))}
+main{padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 40px)}
+.fab{bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 22px)}
+.sheet{background:var(--bg)}
+.sheet header,.sheet footer{background:var(--surface);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.cal button{border-radius:12px;background:var(--surface)}
+.cal button.today{border-color:var(--accent2)}
+.headbox{border-radius:20px}
+/* bandeau d'accueil */
+.hero{position:relative;overflow:hidden;border-radius:28px;padding:22px 20px 20px;color:#fff;
+  background:linear-gradient(165deg,#211b30 0%,#4a3670 58%,#b5698a 100%);box-shadow:0 14px 34px rgba(60,35,100,.28);min-height:168px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px}
+.hero h1{color:#fff;font-size:2.6rem;line-height:1}
+.hero .sub{color:rgba(255,255,255,.78)}
+.hero .hi{font-size:1rem;color:rgba(255,255,255,.92);margin:6px 0 0}
+.hero .halo{position:absolute;right:-30px;top:-30px;width:190px;height:190px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#ffe3a1 0 18%,rgba(246,183,99,.55) 26%,rgba(246,183,99,0) 46%);}
+.hero .halo::before,.hero .halo::after{content:"";position:absolute;inset:14%;border-radius:50%;border:1.5px solid rgba(255,227,161,.45);animation:pulse 5s ease-out infinite}
+.hero .halo::after{animation-delay:2.5s}
+@keyframes pulse{0%{transform:scale(.55);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.hero .syncpill{position:absolute;left:20px;top:18px;background:rgba(255,255,255,.16);color:#fff;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hero .syncpill.ok{background:rgba(160,230,190,.22);color:#d9ffe9}.hero .syncpill.err{background:rgba(255,170,140,.25);color:#ffe0d4}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -202,9 +264,11 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
 <main>
   <!-- ACCUEIL -->
   <section class="screen" id="v-home">
-    <div class="top">
-      <div><h1>Aura</h1><p class="sub" id="todayLabel"></p></div>
+    <div class="hero">
+      <span class="halo" aria-hidden="true"></span>
       <button class="syncpill" id="syncPill" type="button" data-go="stats" style="border:0"></button>
+      <h1>Aura</h1><p class="sub" id="todayLabel"></p>
+      <p class="hi" id="hello"></p>
     </div>
     <button class="btn btn-main btn-big" id="addBig" type="button">+ Noter une crise</button>
     <div id="liveBox" class="screen" style="gap:10px"></div>
@@ -511,7 +575,7 @@ function crisisCard(e){
 function emptyBox(t){const d=document.createElement('div');d.className='empty';d.textContent=t;return d;}
 
 function renderHome(){
-  $('#todayLabel').textContent=cap(new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}));
+  $('#todayLabel').textContent=cap(new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}));{const h=new Date().getHours();const el=$('#hello');if(el)el.textContent=(h<5?'Bonne nuit':h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir')+', comment va ta tête ?';}
   const live=entries.filter(e=>e.endMode==='ongoing').sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
   const lb=$('#liveBox'); lb.innerHTML='';
   if(live.length){
