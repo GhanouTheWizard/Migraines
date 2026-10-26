@@ -7,9 +7,9 @@
 <meta name="theme-color" content="#2a2338">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Accalmie">
+<meta name="apple-mobile-web-app-title" content="Aura">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
-<title>Accalmie</title>
+<title>Aura</title>
 <style>
 /* Appli à onglets : Accueil, Journal, Calendrier, Bilan. Saisie dans une feuille plein écran. Couleurs douces pour les yeux sensibles. */
 :root{
@@ -203,7 +203,7 @@ details.grp .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
   <!-- ACCUEIL -->
   <section class="screen" id="v-home">
     <div class="top">
-      <div><h1>Accalmie</h1><p class="sub" id="todayLabel"></p></div>
+      <div><h1>Aura</h1><p class="sub" id="todayLabel"></p></div>
       <button class="syncpill" id="syncPill" type="button" data-go="stats" style="border:0"></button>
     </div>
     <button class="btn btn-main btn-big" id="addBig" type="button">+ Noter une crise</button>
@@ -835,7 +835,7 @@ $('#addBig').onclick=()=>openForm(null);
 
 /* ---------- export / médecin ---------- */
 function toText(){
-  const L=['ACCALMIE · CARNET DE MIGRAINES',''];
+  const L=['AURA · CARNET DE MIGRAINES',''];
   const s=stats30();
   L.push('30 derniers jours : '+s.days+' jours avec douleur, '+s.mig+' migraines, '+s.ceph+' maux de tête, antidouleurs '+s.medDays+' jours, intensité moyenne '+s.avg+'/10.','');
   [...entries].sort((a,b)=>sortKey(a).localeCompare(sortKey(b))).forEach(e=>{
@@ -1004,7 +1004,7 @@ $('#xlsxBtn').onclick=async()=>{
     const ws2=XLSX.utils.json_to_sheet(meds.length?meds:[{'Date':'','Crise':'','Heure de prise':'','Médicament':'Aucune prise notée','Dose':'','Effet':''}],{cellDates:true,dateNF:'dd/mm/yyyy'});
     ws2['!cols']=[12,22,14,28,12,22].map(w=>({wch:w}));
     const s=summaryOf(list);
-    const sum=[['Accalmie · Carnet de migraines'],['Période',label],['Exporté le',new Date().toLocaleDateString('fr-FR')],[],
+    const sum=[['Aura · Carnet de migraines'],['Période',label],['Exporté le',new Date().toLocaleDateString('fr-FR')],[],
       ['Crises notées',s.n],['Migraines',s.mig],['Maux de tête',s.ceph],['Jours avec douleur',s.days],['Jours avec antidouleur',s.medDays],
       ['Intensité moyenne /10',s.avg??''],['Durée moyenne (min)',s.dur??''],[],['Déclencheurs','Nombre de fois'],...s.trig.slice(0,10),[],['Zones douloureuses','Nombre de fois'],...s.where.slice(0,10)];
     const ws3=XLSX.utils.aoa_to_sheet(sum); ws3['!cols']=[{wch:30},{wch:40}];
@@ -1022,7 +1022,7 @@ $('#pdfBtn').onclick=async()=>{
     await loadScript('lib/jspdf.umd.min.js'); await loadScript('lib/jspdf.plugin.autotable.min.js');
     const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
     const W=doc.internal.pageSize.getWidth(), s=summaryOf(list), violet=[106,79,143];
-    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(35,33,44); doc.text('Accalmie · Carnet de migraines',14,18);
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(35,33,44); doc.text('Aura · Carnet de migraines',14,18);
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(107,104,120);
     doc.text(pdfTxt(label+'  ·  exporté le '+new Date().toLocaleDateString('fr-FR')).replace('·','-'),14,25);
     const boxes=[['Crises',s.n],['Migraines',s.mig],['Maux de tête',s.ceph],['Jours avec douleur',s.days],['Jours avec antidouleur',s.medDays],['Intensité moyenne',s.avg!=null?String(s.avg).replace('.',',')+' /10':'-'],['Durée moyenne',s.dur!=null?fmtDur(s.dur):'-']];
@@ -1044,7 +1044,7 @@ $('#pdfBtn').onclick=async()=>{
       headStyles:{fillColor:violet,textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[248,247,251]},
       columnStyles:{0:{cellWidth:20},1:{cellWidth:20},2:{cellWidth:19},3:{cellWidth:10,halign:'center',fontStyle:'bold'},4:{cellWidth:46},5:{cellWidth:34},6:{cellWidth:46},7:{cellWidth:36}},
       didParseCell:d=>{ if(d.section==='body'&&d.column.index===3){const i=+d.cell.raw||0;d.cell.styles.fillColor=i>=8?[243,201,201]:i>=6?[248,220,200]:i>=4?[246,236,200]:i?[217,236,223]:[248,247,251];} },
-      didDrawPage:()=>{const H=doc.internal.pageSize.getHeight();doc.setFontSize(8);doc.setTextColor(150,147,160);doc.text('Page '+doc.internal.getNumberOfPages(),W-14,H-8,{align:'right'});doc.text('Accalmie · Carnet de migraines',14,H-8);}
+      didDrawPage:()=>{const H=doc.internal.pageSize.getHeight();doc.setFontSize(8);doc.setTextColor(150,147,160);doc.text('Page '+doc.internal.getNumberOfPages(),W-14,H-8,{align:'right'});doc.text('Aura · Carnet de migraines',14,H-8);}
     });
     await deliver(doc.output('blob'),'migraines-'+todayISO()+'.pdf','Carnet de migraines');
   }catch(e){toast('L\u2019export PDF n\u2019a pas marché. Vérifie ta connexion la première fois.');}

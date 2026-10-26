@@ -1,7 +1,7 @@
 {
-  "name": "Accalmie",
-  "short_name": "Accalmie",
-  "description": "Accalmie, carnet de migraines et maux de tête : crises, médicaments, déclencheurs, bilan sur 30 jours.",
+  "name": "Aura",
+  "short_name": "Aura",
+  "description": "Aura, carnet de migraines et maux de tête : crises, médicaments, déclencheurs, bilan sur 30 jours.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
